@@ -1,13 +1,8 @@
-import fs from "node:fs";
-import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
-import { fileURLToPath } from "node:url";
 
 import { neon } from "@neondatabase/serverless";
 
 export type DatabaseKind = "none" | "postgres" | "sqlite";
-
-const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 
 function readDatabaseUrl() {
   return process.env.DATABASE_URL?.trim() ?? "";
@@ -43,22 +38,8 @@ function getPostgresClient() {
 }
 
 function extractSqlitePath(databaseUrl: string) {
-  const relativeOrAbsolutePath = databaseUrl.replace(/^sqlite(?:\+aiosqlite)?:\/\/\//, "");
-  const normalizedPath = relativeOrAbsolutePath.startsWith("/")
-    ? relativeOrAbsolutePath
-    : relativeOrAbsolutePath.replace(/^\/+/, "");
-
-  const candidates = normalizedPath.startsWith("/")
-    ? [normalizedPath]
-    : [
-        path.resolve(process.cwd(), normalizedPath),
-        path.resolve(REPO_ROOT, normalizedPath),
-      ];
-
-  const existingPath = candidates.find((candidate) => fs.existsSync(candidate));
-  if (existingPath) return existingPath;
-
-  return candidates[0];
+  // Keep SQLite path resolution deterministic so Next.js NFT doesn't trace the whole repo.
+  return databaseUrl.replace(/^sqlite(?:\+aiosqlite)?:\/\/\//, "");
 }
 
 const sqliteConnections = new Map<string, DatabaseSync>();

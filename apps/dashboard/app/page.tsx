@@ -1,29 +1,22 @@
-import { Sparkles } from "lucide-react";
-import { AttentionTable } from "@/components/dashboard/attention-table";
 import { AppShellNav } from "@/components/dashboard/app-shell";
 import { AutoRefresh } from "@/components/dashboard/auto-refresh";
 import { ChartShell } from "@/components/dashboard/chart-shell";
 import { FiltersBar } from "@/components/dashboard/filters-bar";
 import { KpiCard } from "@/components/dashboard/kpi-card";
 import { OverviewCharts } from "@/components/dashboard/overview-charts";
-import { StudentsTable } from "@/components/dashboard/students-table";
 import { UserDetailSheet } from "@/components/dashboard/user-detail-sheet";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   getDashboardPageData,
 } from "@/lib/queries";
+import { buildDashboardFiltersFromRecord, readSearchParamValue } from "@/lib/filter-params";
 
 export const dynamic = "force-dynamic";
 
-function formatRate(rate: number | null) {
-  if (rate === null) return "—";
-  return `${Math.round(rate * 100)}%`;
-}
+const OVERVIEW_PRESET_KEYS = ["all", "new", "new_no_activation", "pending", "checkout_no_payment", "paid_no_rsvp", "feedback_missing", "active", "expired"] as const;
 
-function readValue(params: Record<string, string | string[] | undefined>, key: string) {
-  const value = params[key];
-  return Array.isArray(value) ? value[0] : value;
+function getMetricValue(overview: { key: string; count: number }[], key: string) {
+  return overview.find((item) => item.key === key)?.count ?? 0;
 }
 
 export default async function DashboardPage({
@@ -32,23 +25,45 @@ export default async function DashboardPage({
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = (await searchParams) ?? {};
+  const filters = buildDashboardFiltersFromRecord(params, { allowedStatusPresets: [...OVERVIEW_PRESET_KEYS] });
+  const focusTelegramId = readSearchParamValue(params, "focus") ?? null;
 
-  const filters = {
-    from: readValue(params, "from") ?? null,
-    to: readValue(params, "to") ?? null,
-    source: readValue(params, "source") ?? null,
-    state: readValue(params, "state") ?? null,
-    status: readValue(params, "status") ?? null,
-    tariff: readValue(params, "tariff") ?? null,
-    provider: readValue(params, "provider") ?? null,
-    onboardingVersion: readValue(params, "onboardingVersion") ?? null,
-  };
-  const focusTelegramId = readValue(params, "focus") ?? null;
-
-  const { overview, trend, funnel, buckets, stuckUsers, conversions, signals, studentSummary, students, journey, payments, rsvps, feedbacks } =
-    await getDashboardPageData(filters, focusTelegramId);
-
+  const rawStatusPreset = readSearchParamValue(params, "statusPreset");
+  const statusPreset = rawStatusPreset && OVERVIEW_PRESET_KEYS.includes(rawStatusPreset as (typeof OVERVIEW_PRESET_KEYS)[number]) ? rawStatusPreset : null;
+  const pageData = await getDashboardPageData(filters, focusTelegramId);
+  const { overview, trend, funnel, buckets, signals, journey, payments, rsvps, feedbacks } = pageData;
   const spotlightBuckets = buckets.slice(0, 4);
+  const attentionTotal = buckets.reduce((sum, bucket) => sum + bucket.users, 0);
+  const overviewCards = [
+    {
+      key: "waiting-payment",
+      label: "Ждут оплату",
+      value: String(getMetricValue(overview, "pending")),
+      helper: "Люди, которые ещё не купили и требуют внимания команды.",
+      tone: "accent" as const,
+    },
+    {
+      key: "active-paid",
+      label: "Платят сейчас",
+      value: String(getMetricValue(overview, "active")),
+      helper: "Активные платящие пользователи прямо сейчас.",
+      tone: "primary" as const,
+    },
+    {
+      key: "attention-total",
+      label: "Нужно разобрать",
+      value: String(attentionTotal),
+      helper: "Суммарно по понятным зонам риска: оплата, встречи и удержание.",
+      tone: "neutral" as const,
+    },
+    {
+      key: "revenue",
+      label: "Выручка",
+      value: `${getMetricValue(overview, "revenue")} €`,
+      helper: "Сумма успешных оплат по текущей выборке.",
+      tone: "accent" as const,
+    },
+  ];
 
   return (
     <>
@@ -59,12 +74,12 @@ export default async function DashboardPage({
           <div className="grid gap-8 xl:grid-cols-[1.25fr_0.75fr]">
             <div className="space-y-6">
               <div className="space-y-4">
-                <div className="micro-label">Аналитика</div>
+                <div className="micro-label">Обзор</div>
                 <h1 className="max-w-4xl text-[clamp(2.6rem,5vw,5rem)] font-semibold leading-[0.92] tracking-[-0.07em] text-foreground">
-                  Аналитика GregoClub
+                  Что происходит сейчас
                 </h1>
                 <p className="max-w-3xl text-base leading-7 text-muted-foreground md:text-lg">
-                  Живые цифры из продовой базы: регистрации, оплаты, записи на встречи и отзывы.
+                  Короткий срез по продажам, рискам и платящим: что проседает и куда команде смотреть в первую очередь.
                 </p>
               </div>
             </div>
@@ -73,37 +88,36 @@ export default async function DashboardPage({
               <div className="rounded-[calc(var(--radius)-0.2rem)] border border-border/60 bg-white/60 p-5 shadow-[var(--shadow-soft)]">
                 <div className="micro-label">Сейчас важно</div>
                 <p className="mt-3 text-sm leading-7 text-muted-foreground">
-                  Смотрите, кто завис перед оплатой, кто оплатил без записи на встречу и где ещё не собран feedback.
+                  Сначала посмотрите, где тормозится покупка. Затем проверьте, что происходит с платящими: дошли ли до встречи и оставили ли отзыв.
                 </p>
               </div>
             </div>
           </div>
         </section>
 
-        <section id="pulse" className="space-y-6">
+        <section id="pulse" className="mt-8 space-y-6">
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {overview.map((item) => (
+            {overviewCards.map((item) => (
               <KpiCard
                 key={item.key}
                 label={item.label}
-                value={item.key === "revenue" ? `${item.count} €` : item.rate === null ? String(item.count) : `${item.count} · ${formatRate(item.rate)}`}
+                value={item.value}
                 helper={item.helper}
                 tone={item.tone}
               />
             ))}
           </div>
 
-          <FiltersBar initialValues={filters} />
+          <FiltersBar initialValues={filters} initialStatusPreset={statusPreset} presetKeys={[...OVERVIEW_PRESET_KEYS]} />
 
           <OverviewCharts trend={trend} funnel={funnel} />
         </section>
 
-        <section id="funnel" className="mt-8 grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+        <section id="funnel" className="mt-8">
           <ChartShell
-            label="Причины"
+            label="Сегодня важно"
             title="Где нужна ручная работа"
-            description="Главные причины, по которым пользователям сейчас нужно внимание."
-            action={<Sparkles className="size-4 text-accent" />}
+            description="Крупные причины, из-за которых пользователи сейчас застревают."
           >
             <div className="space-y-3">
               {spotlightBuckets.length === 0 ? (
@@ -126,65 +140,13 @@ export default async function DashboardPage({
               )}
             </div>
           </ChartShell>
-
-          <ChartShell
-            label="Срезы"
-            title="Разрез по платящим клиентам"
-            description="Группировка по текущему статусу и провайдеру оплаты."
-          >
-            <ScrollArea className="w-full">
-              <div className="min-w-[720px]">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-border/50">
-                      {["Статус", "Оплата", "Платежей", "Плательщиков", "С записью", "С отзывом"].map((item) => (
-                        <th key={item} className="px-3 py-3 text-left micro-label">
-                          {item}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {conversions.length === 0 ? (
-                      <tr>
-                        <td colSpan={6} className="px-3 py-8 text-center text-muted-foreground">
-                          Нет срезов по текущим фильтрам.
-                        </td>
-                      </tr>
-                    ) : (
-                      conversions.slice(0, 10).map((row) => (
-                        <tr key={`${row.status}-${row.paymentProvider}`} className="border-b border-border/40">
-                          <td className="px-3 py-3">{row.status}</td>
-                          <td className="px-3 py-3">{row.paymentProvider}</td>
-                          <td className="px-3 py-3 font-medium text-foreground">{row.paymentsCount}</td>
-                          <td className="px-3 py-3">{row.paidUsers}</td>
-                          <td className="px-3 py-3">{row.rsvpUsers}</td>
-                          <td className="px-3 py-3 text-primary">{row.feedbackUsers}</td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </ScrollArea>
-          </ChartShell>
-        </section>
-
-        <section id="attention" className="mt-8 space-y-6">
-          <ChartShell
-            label="Клиенты"
-            title="Кому нужно внимание"
-            description="Список клиентов, где стоит вмешаться вручную."
-          >
-            <AttentionTable rows={stuckUsers} />
-          </ChartShell>
         </section>
 
         <section id="signals" className="mt-8 grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
           <ChartShell
             label="Последние действия"
-            title="Что произошло недавно"
-            description="Последние реальные события по пользователям из базы."
+            title="Что изменилось недавно"
+            description="Последние понятные события по клиентам и платящим."
           >
             <div className="space-y-3">
               {signals.length === 0 ? (
@@ -210,63 +172,20 @@ export default async function DashboardPage({
 
           <ChartShell
             label="Коротко"
-            title="Как использовать дашборд"
-            description="Три простых вопроса для ежедневной работы."
+            title="Как читать обзор"
+            description="Три вопроса, на которые этот экран должен отвечать за минуту."
           >
             <div className="space-y-4 text-sm leading-7 text-muted-foreground">
               <p>
-                <strong className="text-foreground">Сколько живых регистраций и оплат прошло за окно?</strong>
+                <strong className="text-foreground">Просела ли сейчас покупка и где именно?</strong>
               </p>
               <p>
-                <strong className="text-foreground">Кто завис перед оплатой или после неё?</strong>
+                <strong className="text-foreground">Что требует ручного внимания команды сегодня?</strong>
               </p>
               <p>
-                <strong className="text-foreground">Где уже есть встречи, но ещё нет отзывов?</strong>
+                <strong className="text-foreground">Что происходит с платящими после покупки?</strong>
               </p>
             </div>
-          </ChartShell>
-        </section>
-
-        <section className="mt-8 space-y-6">
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-            <KpiCard
-              label="Платят сейчас"
-              value={String(studentSummary.currentPaid)}
-              helper="Сколько учеников сейчас с активной оплатой."
-              tone="primary"
-            />
-            <KpiCard
-              label="Больше не платят"
-              value={String(studentSummary.formerPaid)}
-              helper="Сколько учеников платили раньше, но сейчас оплата не активна."
-              tone="accent"
-            />
-            <KpiCard
-              label="Выручка"
-              value={`${studentSummary.revenueTotal.toFixed(0)} €`}
-              helper="Сумма успешных оплат по всем ученикам."
-              tone="primary"
-            />
-            <KpiCard
-              label="Действия в боте"
-              value={String(studentSummary.avgActions30d)}
-              helper="Среднее число зафиксированных действий за 30 дней."
-              tone="neutral"
-            />
-            <KpiCard
-              label="Без отзывов"
-              value={String(studentSummary.noFeedbackCount)}
-              helper={studentSummary.avgRating == null ? "Сколько платящих учеников ещё не оставляли отзывы." : `Средняя оценка: ${studentSummary.avgRating}`}
-              tone="neutral"
-            />
-          </div>
-
-          <ChartShell
-            label="Ученики"
-            title="Платящие и бывшие ученики"
-            description="Здесь собрана вся известная информация по оплатам, активности, встречам и отзывам."
-          >
-            <StudentsTable rows={students} />
           </ChartShell>
         </section>
       </main>

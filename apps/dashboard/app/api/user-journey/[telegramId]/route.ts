@@ -13,5 +13,5 @@ export async function GET(
   const data = hasDatabaseUrl()
     ? await getUserJourneyData(telegramId)
     : (await getDashboardPageData({}, telegramId)).journey;
-  return NextResponse.json(data);
+  return NextResponse.json({ data });
 }

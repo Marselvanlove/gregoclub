@@ -15,8 +15,15 @@ type JourneySummary = {
   onboarding_version: string | null;
   entry_source: string | null;
   last_event: string | null;
+  last_event_at: string | null;
   state_choice: string | null;
   payment_provider: string | null;
+  journey_stage: string | null;
+  journey_step: string | null;
+  blocker_reason: string | null;
+  last_message_key: string | null;
+  next_expected_event: string | null;
+  time_in_step: string | null;
   first_paid_at: string | null;
   first_rsvp_at: string | null;
   first_feedback_at: string | null;
@@ -35,10 +42,13 @@ type JourneyEvent = {
   id: string;
   journey: string;
   onboardingVersion: string;
+  eventCode: string;
   eventName: string;
   stepKey: string | null;
   source: string | null;
   provider: string | null;
+  messageKey: string | null;
+  blockerReason: string | null;
   metadata: Record<string, unknown> | null;
   createdAt: string;
 };
@@ -69,6 +79,10 @@ type FeedbackRecord = {
   nextVisit: string | null;
   createdAt: string;
 };
+
+function hasValue(value: string | null | undefined) {
+  return Boolean(value && value !== "—");
+}
 
 export function UserDetailSheet({
   summary,
@@ -115,21 +129,23 @@ export function UserDetailSheet({
           <div className="space-y-6 px-6 py-6">
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="rounded-[calc(var(--radius)-0.4rem)] border border-border/60 bg-white/60 p-4">
-                <div className="micro-label">Основное</div>
+                <div className="micro-label">Текущий статус</div>
                 <div className="mt-3 space-y-2 text-sm text-muted-foreground">
                   <div>{summary?.username ? `@${summary.username}` : "Без username"}</div>
                   <div>Статус: {summary?.status ?? "—"}</div>
-                  <div>Сценарий: {summary?.onboarding_version ?? "—"}</div>
+                  <div>Последнее действие: {summary?.last_event ?? "—"}</div>
+                  <div>Когда это было: {summary?.last_event_at ?? "—"}</div>
                 </div>
               </div>
 
               <div className="rounded-[calc(var(--radius)-0.4rem)] border border-border/60 bg-white/60 p-4">
-                <div className="micro-label">Причина</div>
+                <div className="micro-label">Где остановился</div>
                 <div className="mt-3">
-                  <Badge variant="accent">{summary?.stuck_bucket ?? "Нет активной причины"}</Badge>
+                  <Badge variant="accent">{summary?.stuck_bucket ?? "Без открытого риска"}</Badge>
                 </div>
-                <div className="mt-3 text-sm text-muted-foreground">
-                  Последнее действие: {summary?.last_event ?? "—"} · сегмент {summary?.state_choice ?? "—"}
+                <div className="mt-3 space-y-1 text-sm text-muted-foreground">
+                  <div>Сколько уже стоит на месте: {summary?.time_in_step ?? "—"}</div>
+                  {hasValue(summary?.next_expected_event) ? <div>Следующий ожидаемый шаг: {summary?.next_expected_event}</div> : null}
                 </div>
               </div>
             </div>
@@ -156,7 +172,7 @@ export function UserDetailSheet({
             <div className="rounded-[calc(var(--radius)-0.35rem)] border border-border/60 bg-white/60 p-5">
               <div className="flex items-center gap-2">
                 <CircleGauge className="size-4 text-primary" />
-                <div className="micro-label">Этапы</div>
+                <div className="micro-label">После оплаты</div>
               </div>
               <div className="mt-4 space-y-2 text-sm text-muted-foreground">
                 <div>Первая оплата: {summary?.first_paid_at ?? "—"}</div>
@@ -164,9 +180,8 @@ export function UserDetailSheet({
                 <div>Всего оплат: {summary?.payments_count ?? "0"} · {summary?.total_paid ?? "0"} €</div>
                 <div>Первая запись: {summary?.first_rsvp_at ?? "—"}</div>
                 <div>Первый отзыв: {summary?.first_feedback_at ?? "—"}</div>
-                <div>Способ оплаты: {summary?.payment_provider ?? "—"}</div>
-                <div>Действий в боте за 7 дней: {summary?.actions_7d ?? "0"}</div>
-                <div>Действий в боте за 30 дней: {summary?.actions_30d ?? "0"}</div>
+                <div>Активность в боте за 30 дней: {summary?.actions_30d ?? "0"}</div>
+                <div>Последняя активность: {summary?.last_action_at ?? "—"}</div>
               </div>
             </div>
 
@@ -240,17 +255,16 @@ export function UserDetailSheet({
                 </div>
               ) : (
                 timeline.map((event) => (
-                  <div
-                    key={event.id}
-                    className="rounded-[calc(var(--radius)-0.4rem)] border border-border/60 bg-white/60 p-4 shadow-[var(--shadow-soft)]"
-                  >
+                  <div key={event.id} className="rounded-[calc(var(--radius)-0.4rem)] border border-border/60 bg-white/60 p-4 shadow-[var(--shadow-soft)]">
                     <div className="flex flex-wrap items-center gap-2">
                       <Badge variant="primary">{event.eventName}</Badge>
                       {event.provider ? <Badge variant="accent">{event.provider}</Badge> : null}
                       <span className="text-xs text-muted-foreground">{event.createdAt}</span>
                     </div>
-                    <div className="mt-3 text-sm text-muted-foreground">
-                      {event.source ?? "—"}
+                    <div className="mt-3 space-y-3 text-sm text-muted-foreground">
+                      <div>Этап: {event.journey}</div>
+                      {hasValue(event.source) ? <div>Контекст: {event.source}</div> : null}
+                      {hasValue(event.blockerReason) ? <div>Причина остановки: {event.blockerReason}</div> : null}
                     </div>
                   </div>
                 ))

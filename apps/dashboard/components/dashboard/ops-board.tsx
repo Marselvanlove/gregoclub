@@ -73,6 +73,7 @@ function SortableOpsCard({
         </div>
         <button
           className="rounded-full border border-border/60 bg-white/70 p-2 text-muted-foreground transition hover:text-foreground"
+          aria-label="Перетащить карточку"
           {...attributes}
           {...listeners}
         >
@@ -145,6 +146,7 @@ export function OpsBoard({
       ),
     [lanes],
   );
+  const laneIds = useMemo(() => new Set(lanes.map((lane) => lane.id)), [lanes]);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -154,12 +156,8 @@ export function OpsBoard({
     if (!activeData) return;
 
     const overData = laneMap.get(String(over.id));
-    const targetLaneId = overData?.laneId ?? (String(over.id).startsWith("early-friction") ||
-      String(over.id).startsWith("decision-lag") ||
-      String(over.id).startsWith("activation-risk") ||
-      String(over.id).startsWith("reviewed")
-        ? String(over.id)
-        : null);
+    const overId = String(over.id);
+    const targetLaneId = overData?.laneId ?? (laneIds.has(overId) ? overId : null);
 
     if (!targetLaneId || activeData.laneId === targetLaneId) return;
 
@@ -195,7 +193,7 @@ export function OpsBoard({
     <div className="space-y-4">
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <Sparkles className="size-4 text-accent" />
-        Карточки можно быстро распределять по колонкам.
+        Разберите клиентов по понятным причинам и откройте карточку, если нужен контекст.
       </div>
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <div className="grid gap-4 xl:grid-cols-4">
@@ -222,7 +220,7 @@ export function OpsBoard({
             </LaneDropZone>
           ))}
         </div>
-        {isPending ? <div className="text-sm text-muted-foreground">Открываю карточку...</div> : null}
+        {isPending ? <div className="text-sm text-muted-foreground">Открываю карточку…</div> : null}
       </DndContext>
     </div>
   );

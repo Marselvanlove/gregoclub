@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { LayoutGrid, PanelRightOpen, Radar, Rows4 } from "lucide-react";
+import { LayoutGrid, PanelRightOpen, PhoneCall, Radar, Rows4 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -12,20 +12,29 @@ const NAV_ITEMS = [
   {
     href: "/",
     label: "Обзор",
-    description: "Основные цифры и узкие места",
+    description: "Кратко: продажи, риски и что требует внимания",
     icon: LayoutGrid,
   },
   {
     href: "/ops",
     label: "Очередь",
-    description: "Клиенты, которым нужно внимание",
+    description: "Кто вошёл в бота, но не купил и где остановился",
     icon: Rows4,
+  },
+  {
+    href: "/calls",
+    label: "Созвоны",
+    description: "Активные и бывшие платящие: встречи и отзывы",
+    icon: PhoneCall,
   },
 ];
 
 function buildHref(baseHref: string, searchParams: URLSearchParams) {
-  const params = new URLSearchParams(searchParams.toString());
-  params.delete("focus");
+  const params = new URLSearchParams();
+  ["from", "to", "provider"].forEach((key) => {
+    const value = searchParams.get(key);
+    if (value) params.set(key, value);
+  });
   const query = params.toString();
   return query ? `${baseHref}?${query}` : baseHref;
 }
@@ -69,7 +78,7 @@ export function AppShellNav() {
 
         <Sheet>
           <SheetTrigger asChild className="md:hidden">
-            <Button variant="subtle" size="icon" aria-label="Open navigation">
+            <Button variant="subtle" size="icon" aria-label="Открыть навигацию">
               <PanelRightOpen className="size-4" />
             </Button>
           </SheetTrigger>

@@ -33,12 +33,12 @@ function statusTone(status: string) {
   return "neutral" as const;
 }
 
-export function StudentsTable({ rows }: { rows: StudentRow[] }) {
+export function StudentsTable({ rows, limit = 20 }: { rows: StudentRow[]; limit?: number }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
-  const visibleRows = useMemo(() => rows.slice(0, 20), [rows]);
+  const visibleRows = useMemo(() => rows.slice(0, limit), [limit, rows]);
 
   const openSheet = (telegramId: string) => {
     startTransition(() => {
@@ -59,7 +59,7 @@ export function StudentsTable({ rows }: { rows: StudentRow[] }) {
               <TableHead>Статус</TableHead>
               <TableHead>Оплаты</TableHead>
               <TableHead>Встречи</TableHead>
-              <TableHead>Действия в боте</TableHead>
+              <TableHead>Активность 30 дней</TableHead>
               <TableHead>Отзывы</TableHead>
               <TableHead>Последняя активность</TableHead>
               <TableHead className="text-right">Карточка</TableHead>
@@ -69,7 +69,7 @@ export function StudentsTable({ rows }: { rows: StudentRow[] }) {
             {visibleRows.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={8} className="py-10 text-center text-muted-foreground">
-                  Пока нет данных по платящим ученикам.
+                  По текущим фильтрам нет активных или бывших платящих пользователей.
                 </TableCell>
               </TableRow>
             ) : (
@@ -91,12 +91,7 @@ export function StudentsTable({ rows }: { rows: StudentRow[] }) {
                     </div>
                   </TableCell>
                   <TableCell>{row.attendingCount}</TableCell>
-                  <TableCell>
-                    <div className="space-y-1">
-                      <div>7д: {row.actions7d}</div>
-                      <div className="text-xs text-muted-foreground">30д: {row.actions30d}</div>
-                    </div>
-                  </TableCell>
+                  <TableCell>{row.actions30d}</TableCell>
                   <TableCell>
                     <div className="space-y-1">
                       <div>{row.feedbackCount}</div>

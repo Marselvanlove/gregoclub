@@ -1,6 +1,11 @@
 import { cache } from "react";
 
-import { getDatabaseKind, hasDatabaseUrl, query, readSqliteRows } from "@/lib/db";
+import {
+  analyticsConsumerFieldsEnabled,
+  getAnalyticsRolloutMode,
+  type AnalyticsRolloutMode,
+} from "./analytics-rollout";
+import { getDatabaseKind, hasDatabaseUrl, query, readSqliteRows } from "./db";
 
 export type DashboardFilters = {
   from?: string | null;
@@ -11,6 +16,10 @@ export type DashboardFilters = {
   tariff?: string | null;
   provider?: string | null;
   onboardingVersion?: string | null;
+  journeyStage?: string | null;
+  journeyStep?: string | null;
+  blockerReason?: string | null;
+  messageKey?: string | null;
 };
 
 export type OverviewMetric = {
@@ -20,6 +29,20 @@ export type OverviewMetric = {
   rate: number | null;
   tone?: "primary" | "accent" | "neutral";
   helper: string;
+};
+
+export type AnalyticsRolloutMetric = {
+  key: "journey_step" | "blocker_reason" | "last_message_key";
+  label: string;
+  filled: number;
+  total: number;
+  rate: number | null;
+  helper: string;
+};
+
+export type AnalyticsRolloutSummary = {
+  mode: AnalyticsRolloutMode;
+  metrics: AnalyticsRolloutMetric[];
 };
 
 export type FunnelRow = {
@@ -64,6 +87,13 @@ export type SignalFeedRecord = {
   createdAt: string;
 };
 
+export type OpsLaneData = {
+  id: string;
+  title: string;
+  description: string;
+  cards: StuckUserRecord[];
+};
+
 export type JourneySummary = {
   telegram_id: string;
   full_name: string | null;
@@ -77,6 +107,12 @@ export type JourneySummary = {
   last_event_at: string | null;
   state_choice: string | null;
   payment_provider: string | null;
+  journey_stage: string | null;
+  journey_step: string | null;
+  blocker_reason: string | null;
+  last_message_key: string | null;
+  next_expected_event: string | null;
+  time_in_step: string | null;
   first_paid_at: string | null;
   first_rsvp_at: string | null;
   first_feedback_at: string | null;
@@ -95,10 +131,13 @@ export type JourneyEvent = {
   id: string;
   journey: string;
   onboardingVersion: string;
+  eventCode: string;
   eventName: string;
   stepKey: string | null;
   source: string | null;
   provider: string | null;
+  messageKey: string | null;
+  blockerReason: string | null;
   metadata: Record<string, unknown> | null;
   createdAt: string;
 };
@@ -119,6 +158,9 @@ export type StudentPortfolioSummary = {
   avgActions30d: number;
   avgRating: number | null;
   noFeedbackCount: number;
+  attendedUsers: number;
+  feedbackUsers: number;
+  withoutRsvpCount: number;
 };
 
 export type StudentRow = {
@@ -166,7 +208,30 @@ export type FeedbackRecord = {
   createdAt: string;
 };
 
+export type CallSessionRecord = {
+  id: string;
+  eventTitle: string;
+  eventDate: string | null;
+  attendees: number;
+  declines: number;
+  feedbacks: number;
+  avgRating: number | null;
+};
+
+export type FeedbackHighlightRecord = {
+  id: string;
+  telegramId: string;
+  fullName: string | null;
+  username: string | null;
+  eventTitle: string;
+  eventDate: string | null;
+  rating: number | null;
+  comment: string | null;
+  createdAt: string;
+};
+
 export type DashboardPageData = {
+  analyticsRollout: AnalyticsRolloutSummary;
   overview: OverviewMetric[];
   trend: TrendPoint[];
   funnel: FunnelRow[];
@@ -186,8 +251,27 @@ export type DashboardPageData = {
 };
 
 export type OpsPageData = {
+  analyticsRollout: AnalyticsRolloutSummary;
+  overview: OverviewMetric[];
+  funnel: FunnelRow[];
   users: StuckUserRecord[];
   buckets: BucketSummary[];
+  lanes: OpsLaneData[];
+  signals: SignalFeedRecord[];
+  journey: {
+    summary: JourneySummary | null;
+    timeline: JourneyEvent[];
+  } | null;
+  payments: PaymentRecord[];
+  rsvps: RsvpRecord[];
+  feedbacks: FeedbackRecord[];
+};
+
+export type CallsPageData = {
+  studentSummary: StudentPortfolioSummary;
+  sessions: CallSessionRecord[];
+  feedbackHighlights: FeedbackHighlightRecord[];
+  students: StudentRow[];
   journey: {
     summary: JourneySummary | null;
     timeline: JourneyEvent[];
@@ -269,6 +353,14 @@ type RawAnalyticsProfile = {
   last_event_at: string | null;
   state_choice: string | null;
   payment_provider: string | null;
+  journey_stage: string | null;
+  journey_step: string | null;
+  blocker_reason: string | null;
+  last_message_key: string | null;
+  next_expected_event: string | null;
+  step_entered_at: string | null;
+  step_last_seen_at: string | null;
+  time_in_step_sec: number | null;
   first_paid_at: string | null;
   first_rsvp_at: string | null;
   first_feedback_at: string | null;
@@ -287,8 +379,10 @@ type RawData = {
 
 type PreparedUser = {
   user: RawUser;
+  rawProfile: RawAnalyticsProfile | null;
   profile: RawAnalyticsProfile | null;
   timeline: JourneyEvent[];
+  currentJourneyStage: string | null;
   payments: RawPayment[];
   successPayments: RawPayment[];
   rsvps: RawRsvp[];
@@ -306,6 +400,7 @@ type PreparedUser = {
   lastActionAt: string | null;
   lastEvent: string | null;
   lastEventAt: string | null;
+  timeInStep: string | null;
   attentionBucket: string | null;
   attentionReferenceAt: string | null;
   actions7d: number;
@@ -316,6 +411,9 @@ type PreparedData = {
   users: PreparedUser[];
   usersByTelegramId: Map<string, PreparedUser>;
 };
+
+const ANALYTICS_ROLLOUT_MODE = getAnalyticsRolloutMode();
+const ANALYTICS_CONSUMER_FIELDS_ENABLED = analyticsConsumerFieldsEnabled(ANALYTICS_ROLLOUT_MODE);
 
 const STATUS_LABELS: Record<string, string> = {
   new: "Новый",
@@ -362,18 +460,32 @@ const EVENT_LABELS: Record<string, string> = {
   rsvp_declined: "Отказался от встречи",
   feedback_completed: "Оставил отзыв",
   onboarding_started: "Начали диалог",
+  step_1_sent: "Показали шаг 1",
+  step_2_sent: "Показали шаг 2",
+  step_3_sent: "Показали шаг 3",
   state_picker_opened: "Открыли выбор ситуации",
   state_selected: "Выбрали ситуацию",
   branch_offer_sent: "Увидели предложение",
   more_info_opened: "Открыли подробности",
   schedule_opened: "Открыли расписание",
+  tariffs_opened: "Открыли тарифы",
+  demo_started: "Запустили демо",
+  demo_skipped: "Пропустили демо",
+  demo_completed: "Завершили демо",
+  level_question_sent: "Показали вопрос про уровень",
+  level_selected: "Выбрали уровень",
   payment_flow_entered: "Перешли к оплате",
   tariff_selected: "Выбрали тариф",
   checkout_redirect_opened: "Нажали оплатить",
   payment_succeeded: "Оплатили",
   first_rsvp_attending: "Записались",
   first_feedback_completed: "Оставили отзыв",
+  group_join_confirmed: "Подтвердили вход в группу",
+  group_join_failed: "Не вошли в группу",
   pending_reminder_sent: "Отправлено напоминание",
+  pending_reminder_thinking_clicked: "Нажал «подумаю»",
+  pending_reminder_question_clicked: "Нажал «есть вопрос»",
+  pending_reminder_payment_clicked: "Нажал «проблема с оплатой»",
   new_reminder_sent: "Напоминание новому клиенту",
 };
 
@@ -383,6 +495,86 @@ const ATTENTION_BUCKETS = {
   attendedNoFeedback: "Были на встрече, но без отзыва",
   expired: "Подписка истекла",
 } as const;
+
+const QUEUE_BUCKETS = {
+  checkoutDrop: "Нажали оплатить, но не купили",
+  paymentFlowDrop: "Дошли до оплаты, но остановились",
+  pending: "Ожидают оплату",
+  cold: "Нет действий 7 дней",
+  newLead: "Новый лид",
+} as const;
+
+const BLOCKER_REASON_LABELS: Record<string, string> = {
+  intro_no_action_10m: "После старта не сделал следующий шаг 10м",
+  state_not_selected_10m: "Не выбрал свою ситуацию 10м",
+  offer_no_next_step_24h: "После предложения не пошёл дальше 24ч",
+  more_info_no_payment_24h: "Смотрел подробности, но не дошёл до оплаты 24ч",
+  schedule_no_payment_24h: "Смотрел расписание, но не дошёл до оплаты 24ч",
+  payment_flow_no_tariff_2h: "Дошёл до оплаты, но не выбрал тариф 2ч",
+  tariff_selected_no_checkout_30m: "Выбрал тариф, но не открыл оплату 30м",
+  checkout_no_payment_2h: "Открыл оплату, но не оплатил 2ч",
+  checkout_no_payment_24h: "Открыл оплату, но не оплатил 24ч",
+  checkout_no_payment_48h: "Открыл оплату, но не оплатил 48ч",
+  payment_failed_provider: "Ошибка оплаты у провайдера",
+  pending_reminder_thinking_clicked: "Нажал «подумаю» в reminder",
+  pending_reminder_question_clicked: "Нажал «есть вопрос» в reminder",
+  pending_reminder_payment_clicked: "Нажал «проблема с оплатой»",
+  group_join_no: "Не вошёл в группу",
+  paid_no_rsvp_72h: "Оплатил, но не записался 72ч",
+  rsvp_declined_first_event: "Отказался от первой записи",
+  feedback_prompt_ignored_24h: "Не оставил отзыв 24ч",
+  subscription_expired_no_return_7d: "Истёк и не вернулся 7д",
+  subscription_expired_recent: "Подписка истекла недавно",
+  new_no_activation_24h: "Новый без активации 24ч",
+  new_no_activation_7d: "Новый без активации 7д",
+} as const;
+
+const MESSAGE_KEY_LABELS: Record<string, string> = {
+  "starts.entry": "Starts: старт",
+  "starts1.entry": "Starts1: старт",
+  "starts1.video_note": "Starts1: видео-кружок",
+  "starts1.intro": "Starts1: intro",
+  "starts.intro_media": "Starts: intro media",
+  "starts.target_audience": "Starts: аудитория",
+  "starts1.state_picker": "Starts1: выбор состояния",
+  "starts1.branch.culture": "Starts1: ветка culture",
+  "starts1.branch.thaw": "Starts1: ветка thaw",
+  "starts1.branch.generic": "Starts: общий оффер",
+  "starts1.more_info": "Starts1: подробнее",
+  "starts1.schedule": "Starts1: расписание",
+  "starts1.delayed_tariffs": "Starts1: отложенные тарифы",
+  "legacy.step_1": "Legacy: шаг 1",
+  "legacy.step_2": "Legacy: шаг 2",
+  "legacy.step_3": "Legacy: шаг 3",
+  "legacy.demo_intro": "Legacy: старт демо",
+  "legacy.demo_end": "Legacy: конец демо",
+  "legacy.level_question": "Legacy: вопрос про уровень",
+  "legacy.schedule": "Legacy: расписание",
+  "legacy.tariffs": "Legacy: тарифы",
+  "payment.tariff_card": "Оплата: карточка тарифов",
+  "payment.checkout.card": "Оплата: checkout card",
+  "payment.checkout.redirect": "Оплата: переход в checkout",
+  "activation.group_join_check": "Активация: проверка входа в группу",
+  "engagement.rsvp.prompt": "Встречи: RSVP prompt",
+} as const;
+
+const JOURNEY_STAGE_LABELS: Record<string, string> = {
+  entry: "Вход",
+  onboarding: "Онбординг",
+  payment: "Оплата",
+  activation: "Активация",
+  engagement: "Вовлечение",
+  retention: "Удержание",
+  churn: "Отток",
+  recovery: "Возврат",
+  lifecycle: "Жизненный цикл",
+  subscription: "Подписка",
+  registration: "Регистрация",
+  rsvp: "Запись",
+  feedback: "Отзыв",
+} as const;
+
+type UserSegment = "all" | "queue" | "calls";
 
 function humanizeStatus(value: string | null | undefined) {
   if (!value) return "—";
@@ -424,6 +616,172 @@ function humanizeBucket(value: string | null | undefined) {
   return value;
 }
 
+function humanizeBlockerReason(value: string | null | undefined) {
+  if (!value) return "—";
+  return BLOCKER_REASON_LABELS[value] ?? value;
+}
+
+function humanizeMessageKey(value: string | null | undefined) {
+  if (!value) return "—";
+  return MESSAGE_KEY_LABELS[value] ?? value;
+}
+
+function humanizeJourneyStage(value: string | null | undefined) {
+  if (!value) return "—";
+  return JOURNEY_STAGE_LABELS[value] ?? value;
+}
+
+function humanizeJourneyStep(value: string | null | undefined) {
+  if (!value) return "—";
+  if (MESSAGE_KEY_LABELS[value]) return humanizeMessageKey(value);
+
+  if (value === "entry.registered") return "Регистрация создана";
+  if (value === "payment.checkout_pending") return "Открыл оплату, но не завершил";
+  if (value === "subscription.active") return "Активная подписка";
+  if (value === "churn.subscription_expired") return "Подписка истекла";
+  if (value === "engagement.awaiting_first_rsvp") return "После оплаты ждём первую запись";
+  if (value === "engagement.awaiting_feedback") return "После встречи ждём feedback";
+  if (value === "activation.group_join_check") return "Проверка входа в группу";
+  if (value === "activation.group_join_confirmed") return "Подтвердил вход в группу";
+  if (value === "activation.group_join_failed") return "Не вошёл в группу";
+  if (value === "engagement.first_rsvp_attending") return "Первая запись на встречу";
+  if (value === "engagement.rsvp_declined") return "Отказался от встречи";
+  if (value === "engagement.feedback_prompt") return "Отправлен feedback prompt";
+  if (value === "engagement.first_feedback_completed") return "Первый feedback получен";
+  if (value === "subscription.payment_succeeded") return "Оплата подтверждена";
+  if (value === "subscription.activated") return "Подписка активирована";
+
+  if (value.startsWith("onboarding.")) {
+    const suffix = value.replace(/^onboarding\./, "");
+    return humanizeMessageKey(suffix);
+  }
+  if (value.startsWith("payment.tariff_selected.")) {
+    return `Оплата: выбран тариф ${value.replace("payment.tariff_selected.", "")}`;
+  }
+  if (value.startsWith("payment.checkout_redirect.")) {
+    return `Оплата: открыт checkout ${value.replace("payment.checkout_redirect.", "")}`;
+  }
+  if (value.startsWith("payment.failed.")) {
+    return `Оплата: ошибка ${value.replace("payment.failed.", "")}`;
+  }
+  if (value.startsWith("payment.pending_reminder.")) {
+    return `Pending reminder #${value.replace("payment.pending_reminder.", "")}`;
+  }
+  if (value.startsWith("entry.new_reminder.")) {
+    return `New reminder #${value.replace("entry.new_reminder.", "")}`;
+  }
+  if (value.startsWith("recovery.winback.")) {
+    return `Winback #${value.replace("recovery.winback.", "")}`;
+  }
+  if (value.startsWith("onboarding.core.level_selected.")) {
+    return `Выбран уровень ${value.replace("onboarding.core.level_selected.", "")}`;
+  }
+  if (value.startsWith("onboarding.starts1.state_selected.")) {
+    return `Starts1: выбрал состояние ${value.replace("onboarding.starts1.state_selected.", "")}`;
+  }
+  if (value.startsWith("onboarding.starts1.branch_offer.")) {
+    return `Starts1: оффер ${value.replace("onboarding.starts1.branch_offer.", "")}`;
+  }
+
+  return value;
+}
+
+function humanizeEventSource(value: string | null | undefined) {
+  if (!value) return null;
+  if (value === "analytics_events") return null;
+  if (value === "scheduler") return "Автоматическое напоминание";
+  if (value === "action:pay" || value === "/pay") return "Перешёл к оплате";
+  if (value === "action:schedule" || value === "/schedule") return "Открыл расписание";
+  if (value.startsWith("pending_reminder")) return "Напоминание об оплате";
+  if (value.startsWith("payment_flow")) return "Шаг оплаты";
+  return value;
+}
+
+function extractMessageKey(metadata: Record<string, unknown> | null | undefined) {
+  const raw = metadata?.message_key;
+  return typeof raw === "string" && raw.length > 0 ? raw : null;
+}
+
+function extractBlockerReason(metadata: Record<string, unknown> | null | undefined) {
+  const raw = metadata?.blocker_reason;
+  return typeof raw === "string" && raw.length > 0 ? raw : null;
+}
+
+function hasNonEmptyValue(value: string | null | undefined) {
+  return Boolean(value && value.trim().length > 0);
+}
+
+function getConsumerAnalyticsProfile(profile: RawAnalyticsProfile | null): RawAnalyticsProfile | null {
+  if (!profile) return null;
+  if (ANALYTICS_CONSUMER_FIELDS_ENABLED) return profile;
+
+  return {
+    ...profile,
+    journey_stage: null,
+    journey_step: null,
+    blocker_reason: null,
+    last_message_key: null,
+    next_expected_event: null,
+    step_entered_at: null,
+    step_last_seen_at: null,
+    time_in_step_sec: null,
+    stuck_bucket: null,
+  };
+}
+
+function isPaidUser(user: PreparedUser) {
+  return user.successPayments.length > 0;
+}
+
+function matchesSegment(user: PreparedUser, segment: UserSegment) {
+  if (segment === "queue") {
+    return !isPaidUser(user) && user.user.status !== "active" && user.user.status !== "expired";
+  }
+  if (segment === "calls") {
+    return isPaidUser(user) && (user.user.status === "active" || user.user.status === "expired");
+  }
+  return true;
+}
+
+function hasPaymentJourney(user: PreparedUser) {
+  if (user.user.last_pay_click_at) return true;
+  return user.timeline.some((event) => event.journey === "payment");
+}
+
+function getLegacyQueueBucket(user: PreparedUser) {
+  if (isPaidUser(user)) return null;
+  if (user.user.last_pay_click_at) return QUEUE_BUCKETS.checkoutDrop;
+  if (hasPaymentJourney(user)) return QUEUE_BUCKETS.paymentFlowDrop;
+  if (user.user.status === "pending") return QUEUE_BUCKETS.pending;
+  if (user.actions7d === 0) return QUEUE_BUCKETS.cold;
+  return QUEUE_BUCKETS.newLead;
+}
+
+function getOpsQueueLabel(user: PreparedUser) {
+  if (user.profile?.blocker_reason) return humanizeBlockerReason(user.profile.blocker_reason);
+  return getLegacyQueueBucket(user);
+}
+
+function queuePriorityForUser(user: PreparedUser) {
+  if (user.profile?.blocker_reason) return -1;
+  return queueBucketPriority(getLegacyQueueBucket(user));
+}
+
+function queueBucketPriority(bucket: string | null | undefined) {
+  switch (bucket) {
+    case QUEUE_BUCKETS.checkoutDrop:
+      return 0;
+    case QUEUE_BUCKETS.paymentFlowDrop:
+      return 1;
+    case QUEUE_BUCKETS.pending:
+      return 2;
+    case QUEUE_BUCKETS.cold:
+      return 3;
+    default:
+      return 4;
+  }
+}
+
 function sanitizeFilterValue(value?: string | null): string | null {
   if (!value) return null;
   const trimmed = value.trim();
@@ -440,7 +798,36 @@ function normalizeFilters(filters: DashboardFilters): DashboardFilters {
     tariff: sanitizeFilterValue(filters.tariff),
     provider: sanitizeFilterValue(filters.provider),
     onboardingVersion: sanitizeFilterValue(filters.onboardingVersion),
+    journeyStage: sanitizeFilterValue(filters.journeyStage),
+    journeyStep: sanitizeFilterValue(filters.journeyStep),
+    blockerReason: sanitizeFilterValue(filters.blockerReason),
+    messageKey: sanitizeFilterValue(filters.messageKey),
   };
+}
+
+function matchesTextFilter(value: string | null | undefined, filter: string | null | undefined) {
+  if (!filter) return true;
+  const haystack = (value ?? "").toLowerCase();
+  return haystack.includes(filter.toLowerCase());
+}
+
+function userMatchesSource(user: PreparedUser, source: string | null | undefined) {
+  if (!source) return true;
+  const normalized = source.toLowerCase();
+  if ((user.profile?.entry_source ?? "").toLowerCase().includes(normalized)) return true;
+  return user.timeline.some((event) => (event.source ?? "").toLowerCase().includes(normalized));
+}
+
+function userMatchesJourneyStage(user: PreparedUser, journeyStage: string | null | undefined) {
+  if (!journeyStage) return true;
+  return (user.currentJourneyStage ?? "").toLowerCase() === journeyStage.toLowerCase();
+}
+
+function userMatchesMessageKey(user: PreparedUser, messageKey: string | null | undefined) {
+  if (!messageKey) return true;
+  const normalized = messageKey.toLowerCase();
+  if ((user.profile?.last_message_key ?? "").toLowerCase().includes(normalized)) return true;
+  return user.timeline.some((event) => (event.messageKey ?? "").toLowerCase().includes(normalized));
 }
 
 function toNumber(value: unknown) {
@@ -453,8 +840,63 @@ function dateKey(value: string | null | undefined) {
   return value ? value.slice(0, 10) : null;
 }
 
+function formatDateLabel(value: string | null | undefined) {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat("ru-RU", {
+    day: "2-digit",
+    month: "short",
+  })
+    .format(date)
+    .replace(".", "");
+}
+
+function formatDateTimeLabel(value: string | null | undefined) {
+  if (!value) return "—";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat("ru-RU", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  })
+    .format(date)
+    .replace(",", "");
+}
+
 function compareDesc(left: string | null | undefined, right: string | null | undefined) {
   return (right ?? "").localeCompare(left ?? "");
+}
+
+function humanizeDurationSince(value: string | null | undefined) {
+  if (!value) return null;
+  const timestamp = Date.parse(value);
+  if (Number.isNaN(timestamp)) return null;
+  const diffMs = Date.now() - timestamp;
+  if (diffMs < 0) return "0м";
+
+  const totalMinutes = Math.floor(diffMs / 60000);
+  const days = Math.floor(totalMinutes / (60 * 24));
+  const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
+  const minutes = totalMinutes % 60;
+
+  if (days > 0) return `${days}д ${hours}ч`;
+  if (hours > 0) return `${hours}ч ${minutes}м`;
+  return `${Math.max(minutes, 1)}м`;
+}
+
+function humanizeDurationFromSeconds(value: number | null | undefined) {
+  if (value == null || Number.isNaN(value)) return null;
+  const totalMinutes = Math.floor(Math.max(value, 0) / 60);
+  const days = Math.floor(totalMinutes / (60 * 24));
+  const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
+  const minutes = totalMinutes % 60;
+
+  if (days > 0) return `${days}д ${hours}ч`;
+  if (hours > 0) return `${hours}ч ${minutes}м`;
+  return `${Math.max(minutes, 1)}м`;
 }
 
 function formatDayLabel(key: string) {
@@ -677,6 +1119,14 @@ const loadRawData = cache(async (): Promise<RawData | null> => {
         last_event_at,
         state_choice,
         payment_provider,
+        journey_stage,
+        journey_step,
+        blocker_reason,
+        last_message_key,
+        next_expected_event,
+        step_entered_at,
+        step_last_seen_at,
+        time_in_step_sec,
         first_paid_at,
         first_rsvp_at,
         first_feedback_at,
@@ -748,7 +1198,8 @@ const loadPreparedData = cache(async (): Promise<PreparedData | null> => {
 
   const preparedUsers = rawData.users.map<PreparedUser>((user) => {
     const telegramId = String(user.telegram_id);
-    const profile = profilesByTelegramId.get(telegramId) ?? null;
+    const rawProfile = profilesByTelegramId.get(telegramId) ?? null;
+    const profile = getConsumerAnalyticsProfile(rawProfile);
     const payments = [...(paymentsByUserId.get(user.id) ?? [])].sort((left, right) => compareDesc(left.created_at, right.created_at));
     const successPayments = payments.filter((payment) => payment.status === "success");
     const rsvps = [...(rsvpsByTelegramId.get(telegramId) ?? [])].sort((left, right) => compareDesc(left.created_at, right.created_at));
@@ -763,10 +1214,13 @@ const loadPreparedData = cache(async (): Promise<PreparedData | null> => {
               id: `registration:${telegramId}`,
               journey: "registration",
               onboardingVersion: profile?.onboarding_version ?? "—",
+              eventCode: "registration_created",
               eventName: humanizeEventName("registration_created"),
               stepKey: null,
               source: "Пользователь создан",
               provider: null,
+              messageKey: null,
+              blockerReason: null,
               metadata: null,
               createdAt: user.registration_date,
             }
@@ -776,10 +1230,13 @@ const loadPreparedData = cache(async (): Promise<PreparedData | null> => {
               id: `checkout:${telegramId}`,
               journey: "payment",
               onboardingVersion: profile?.onboarding_version ?? "—",
+              eventCode: "checkout_opened",
               eventName: humanizeEventName("checkout_opened"),
               stepKey: "checkout",
               source: "Последний клик по оплате",
               provider: user.payment_provider ? humanizeProvider(user.payment_provider) : null,
+              messageKey: null,
+              blockerReason: null,
               metadata: null,
               createdAt: user.last_pay_click_at,
             }
@@ -790,10 +1247,13 @@ const loadPreparedData = cache(async (): Promise<PreparedData | null> => {
             id: `payment:${payment.id}`,
             journey: "payment",
             onboardingVersion: profile?.onboarding_version ?? "—",
+            eventCode: "payment_recorded",
             eventName: humanizeEventName("payment_recorded"),
             stepKey: payment.status,
             source: payment.currency ? `${payment.currency} / ${humanizePaymentStatus(payment.status)}` : humanizePaymentStatus(payment.status),
             provider: payment.provider ? humanizeProvider(payment.provider) : null,
+            messageKey: null,
+            blockerReason: null,
             metadata: { amount: payment.amount, status: payment.status },
             createdAt: payment.created_at!,
           })),
@@ -805,10 +1265,13 @@ const loadPreparedData = cache(async (): Promise<PreparedData | null> => {
               id: `rsvp:${rsvp.id}`,
               journey: "rsvp",
               onboardingVersion: profile?.onboarding_version ?? "—",
+              eventCode: rsvp.response === "attending" ? "rsvp_attending" : "rsvp_declined",
               eventName: humanizeEventName(rsvp.response === "attending" ? "rsvp_attending" : "rsvp_declined"),
               stepKey: rsvp.response,
               source: broadcast?.rsvp_event_title ?? broadcast?.content_text ?? "Встреча",
               provider: null,
+              messageKey: null,
+              blockerReason: null,
               metadata: { broadcastId: rsvp.broadcast_id },
               createdAt: rsvp.created_at!,
             };
@@ -821,10 +1284,13 @@ const loadPreparedData = cache(async (): Promise<PreparedData | null> => {
               id: `feedback:${feedback.id}`,
               journey: "feedback",
               onboardingVersion: profile?.onboarding_version ?? "—",
+              eventCode: "feedback_completed",
               eventName: humanizeEventName("feedback_completed"),
               stepKey: feedback.rating == null ? null : String(feedback.rating),
               source: broadcast?.rsvp_event_title ?? broadcast?.content_text ?? "Обратная связь",
               provider: null,
+              messageKey: null,
+              blockerReason: null,
               metadata: {
                 rating: feedback.rating,
                 level: feedback.level_comfort,
@@ -839,10 +1305,13 @@ const loadPreparedData = cache(async (): Promise<PreparedData | null> => {
             id: `analytics:${event.id}`,
             journey: event.journey,
             onboardingVersion: event.onboarding_version ?? "—",
+            eventCode: event.event_name,
             eventName: humanizeEventName(event.event_name),
             stepKey: event.step_key,
-            source: event.source ?? event.step_key ?? "analytics_events",
+            source: humanizeEventSource(event.source ?? event.step_key ?? "analytics_events"),
             provider: event.provider ? humanizeProvider(event.provider) : null,
+            messageKey: extractMessageKey(parseMetadata(event.metadata_json)),
+            blockerReason: extractBlockerReason(parseMetadata(event.metadata_json)),
             metadata: parseMetadata(event.metadata_json),
             createdAt: event.created_at!,
           })),
@@ -859,6 +1328,11 @@ const loadPreparedData = cache(async (): Promise<PreparedData | null> => {
     const lastActionAt = timeline[0]?.createdAt ?? null;
     const lastEvent = profile?.last_event ? humanizeEventName(profile.last_event) : timeline[0]?.eventName ?? null;
     const lastEventAt = profile?.last_event_at ?? timeline[0]?.createdAt ?? null;
+    const currentJourneyStage = profile?.journey_stage ?? null;
+    const timeInStep =
+      humanizeDurationSince(profile?.step_entered_at) ??
+      humanizeDurationFromSeconds(profile?.time_in_step_sec) ??
+      null;
     const totalPaid = successPayments.reduce((sum, payment) => sum + toNumber(payment.amount), 0);
     const ratings = feedbacks.map((feedback) => feedback.rating).filter((rating): rating is number => rating != null);
     const avgRating = ratings.length > 0 ? Math.round((ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length) * 10) / 10 : null;
@@ -883,6 +1357,7 @@ const loadPreparedData = cache(async (): Promise<PreparedData | null> => {
 
     return {
       user,
+      rawProfile,
       profile,
       timeline,
       payments,
@@ -890,6 +1365,7 @@ const loadPreparedData = cache(async (): Promise<PreparedData | null> => {
       rsvps,
       attendingRsvps,
       feedbacks,
+      currentJourneyStage,
       totalPaid,
       avgRating,
       paymentProvider,
@@ -902,6 +1378,7 @@ const loadPreparedData = cache(async (): Promise<PreparedData | null> => {
       lastActionAt,
       lastEvent,
       lastEventAt,
+      timeInStep,
       attentionBucket,
       attentionReferenceAt,
       actions7d: timeline.filter((event) => isWithinLastDays(event.createdAt, 7)).length,
@@ -920,9 +1397,19 @@ function matchesUserFilters(user: PreparedUser, filters: DashboardFilters) {
 
   if (normalized.status && user.user.status !== normalized.status) return false;
   if (normalized.provider && user.paymentProvider !== normalized.provider) return false;
-  if (normalized.source && user.profile?.entry_source !== normalized.source) return false;
-  if (normalized.onboardingVersion && user.profile?.onboarding_version !== normalized.onboardingVersion) return false;
+  if (!userMatchesSource(user, normalized.source)) return false;
+  if (
+    normalized.onboardingVersion &&
+    user.profile?.onboarding_version !== normalized.onboardingVersion &&
+    !user.timeline.some((event) => event.onboardingVersion === normalized.onboardingVersion)
+  ) {
+    return false;
+  }
   if (normalized.state && ![user.profile?.state_choice, user.user.language_level].includes(normalized.state)) return false;
+  if (!userMatchesJourneyStage(user, normalized.journeyStage)) return false;
+  if (!matchesTextFilter(user.profile?.journey_step, normalized.journeyStep)) return false;
+  if (!matchesTextFilter(user.profile?.blocker_reason, normalized.blockerReason)) return false;
+  if (!userMatchesMessageKey(user, normalized.messageKey)) return false;
 
   if (!normalized.from && !normalized.to) {
     return true;
@@ -931,10 +1418,10 @@ function matchesUserFilters(user: PreparedUser, filters: DashboardFilters) {
   return user.timeline.some((event) => matchesDateRange(event.createdAt, normalized));
 }
 
-async function getFilteredUsers(filters: DashboardFilters) {
+async function getFilteredUsers(filters: DashboardFilters, segment: UserSegment = "all") {
   const preparedData = await loadPreparedData();
   if (!preparedData) return [];
-  return preparedData.users.filter((user) => matchesUserFilters(user, filters));
+  return preparedData.users.filter((user) => matchesSegment(user, segment) && matchesUserFilters(user, filters));
 }
 
 function buildTrendPoints(users: PreparedUser[], filters: DashboardFilters) {
@@ -987,8 +1474,51 @@ function countUsersWith(users: PreparedUser[], predicate: (user: PreparedUser) =
   return users.reduce((total, user) => total + (predicate(user) ? 1 : 0), 0);
 }
 
-export async function getOverviewData(filters: DashboardFilters): Promise<OverviewMetric[]> {
-  const users = await getFilteredUsers(filters);
+function buildAnalyticsRolloutData(users: PreparedUser[]): AnalyticsRolloutSummary {
+  const total = users.length;
+  const metric = (
+    key: AnalyticsRolloutMetric["key"],
+    label: AnalyticsRolloutMetric["label"],
+    selector: (user: PreparedUser) => string | null,
+    helper: string,
+  ): AnalyticsRolloutMetric => {
+    const filled = countUsersWith(users, (user) => hasNonEmptyValue(selector(user)));
+    return {
+      key,
+      label,
+      filled,
+      total,
+      rate: total > 0 ? filled / total : null,
+      helper,
+    };
+  };
+
+  return {
+    mode: ANALYTICS_ROLLOUT_MODE,
+    metrics: [
+      metric(
+        "journey_step",
+        "Journey step",
+        (user) => user.rawProfile?.journey_step ?? null,
+        "Доля пользователей, у которых рассчитан текущий шаг journey.",
+      ),
+      metric(
+        "blocker_reason",
+        "Blocker reason",
+        (user) => user.rawProfile?.blocker_reason ?? null,
+        "Доля пользователей, у которых уже есть явная причина блокера.",
+      ),
+      metric(
+        "last_message_key",
+        "Last message key",
+        (user) => user.rawProfile?.last_message_key ?? null,
+        "Доля пользователей, у которых зафиксирован последний message key.",
+      ),
+    ],
+  };
+}
+
+function buildOverviewData(users: PreparedUser[]): OverviewMetric[] {
   const totalUsers = users.length;
   const pendingUsers = countUsersWith(users, (user) => user.user.status === "pending");
   const activeUsers = countUsersWith(users, (user) => user.user.status === "active");
@@ -1066,45 +1596,131 @@ export async function getOverviewData(filters: DashboardFilters): Promise<Overvi
   ];
 }
 
-export async function getFunnelData(filters: DashboardFilters): Promise<FunnelRow[]> {
-  const users = await getFilteredUsers(filters);
-
-  return [
-    {
-      step: "Зарегистрировались",
-      total: users.length,
-      recent: countUsersWith(users, (user) => isWithinLastDays(user.user.registration_date, 30)),
-    },
-    {
-      step: "Оплатили",
-      total: countUsersWith(users, (user) => user.successPayments.length > 0),
-      recent: countUsersWith(users, (user) => user.successPayments.some((payment) => isWithinLastDays(payment.created_at, 30))),
-    },
-    {
-      step: "Записались",
-      total: countUsersWith(users, (user) => user.attendingRsvps.length > 0),
-      recent: countUsersWith(users, (user) => user.attendingRsvps.some((rsvp) => isWithinLastDays(rsvp.created_at, 30))),
-    },
-    {
-      step: "Оставили отзыв",
-      total: countUsersWith(users, (user) => user.feedbacks.length > 0),
-      recent: countUsersWith(users, (user) => user.feedbacks.some((feedback) => isWithinLastDays(feedback.created_at, 30))),
-    },
-  ];
+function userReachedOnboarding(user: PreparedUser) {
+  return Boolean(user.profile?.onboarding_version) || user.timeline.some((event) => event.journey === "onboarding");
 }
 
-export async function getTrendData(filters: DashboardFilters): Promise<TrendPoint[]> {
-  const users = await getFilteredUsers(filters);
-  return buildTrendPoints(users, normalizeFilters(filters));
+function userHasEventCode(user: PreparedUser, eventCodes: string[]) {
+  return user.timeline.some((event) => eventCodes.includes(event.eventCode));
 }
 
-export async function getBucketSummaryData(filters: DashboardFilters): Promise<BucketSummary[]> {
-  const users = await getFilteredUsers(filters);
+function userHasRecentEventCode(user: PreparedUser, eventCodes: string[]) {
+  return user.timeline.some((event) => eventCodes.includes(event.eventCode) && isWithinLastDays(event.createdAt, 30));
+}
+
+function userReachedOffer(user: PreparedUser) {
+  return userHasEventCode(user, [
+    "intro_sent",
+    "branch_offer_sent",
+    "step_3_sent",
+    "state_picker_opened",
+    "more_info_opened",
+    "schedule_opened",
+  ]);
+}
+
+function userQualifiedAfterOffer(user: PreparedUser) {
+  return Boolean(user.profile?.state_choice ?? user.user.language_level) || userHasEventCode(user, ["state_selected", "level_selected"]);
+}
+
+function userReachedPaymentIntent(user: PreparedUser) {
+  return hasPaymentJourney(user) || userHasEventCode(user, ["payment_flow_entered", "tariffs_opened"]);
+}
+
+function userReachedCheckout(user: PreparedUser) {
+  return Boolean(user.user.last_pay_click_at) || user.timeline.some((event) => event.eventCode === "checkout_redirect_opened");
+}
+
+const FUNNEL_STEP_DEFS: Array<{
+  step: string;
+  total: (user: PreparedUser) => boolean;
+  recent: (user: PreparedUser) => boolean;
+}> = [
+  {
+    step: "Регистрация",
+    total: () => true,
+    recent: (user) => isWithinLastDays(user.user.registration_date, 30),
+  },
+  {
+    step: "Начали диалог",
+    total: (user) => userReachedOnboarding(user),
+    recent: (user) =>
+      userHasRecentEventCode(user, ["onboarding_started", "step_1_sent"]) ||
+      Boolean(
+        user.profile?.onboarding_version &&
+          user.timeline.some((event) => event.journey === "onboarding" && isWithinLastDays(event.createdAt, 30)),
+      ),
+  },
+  {
+    step: "Получили первый шаг",
+    total: (user) => userHasEventCode(user, ["intro_sent", "step_1_sent", "step_2_sent"]),
+    recent: (user) => userHasRecentEventCode(user, ["intro_sent", "step_1_sent", "step_2_sent"]),
+  },
+  {
+    step: "Выбрали ситуацию",
+    total: (user) => userQualifiedAfterOffer(user),
+    recent: (user) => userHasRecentEventCode(user, ["state_selected", "level_selected"]),
+  },
+  {
+    step: "Дошли до предложения",
+    total: (user) => userHasEventCode(user, ["branch_offer_sent", "more_info_opened", "schedule_opened", "step_3_sent"]),
+    recent: (user) => userHasRecentEventCode(user, ["branch_offer_sent", "more_info_opened", "schedule_opened", "step_3_sent"]),
+  },
+  {
+    step: "Перешли к оплате",
+    total: (user) => userReachedPaymentIntent(user),
+    recent: (user) => userHasRecentEventCode(user, ["payment_flow_entered", "tariffs_opened"]),
+  },
+  {
+    step: "Открыли оплату",
+    total: (user) => userReachedCheckout(user),
+    recent: (user) =>
+      isWithinLastDays(user.user.last_pay_click_at, 30) || userHasRecentEventCode(user, ["checkout_redirect_opened"]),
+  },
+  {
+    step: "Оплата",
+    total: (user) => user.successPayments.length > 0 || userHasEventCode(user, ["payment_succeeded"]),
+    recent: (user) =>
+      user.successPayments.some((payment) => isWithinLastDays(payment.created_at, 30)) ||
+      userHasRecentEventCode(user, ["payment_succeeded"]),
+  },
+  {
+    step: "Записались на встречу",
+    total: (user) => user.attendingRsvps.length > 0 || userHasEventCode(user, ["first_rsvp_attending"]),
+    recent: (user) =>
+      user.attendingRsvps.some((rsvp) => isWithinLastDays(rsvp.created_at, 30)) ||
+      userHasRecentEventCode(user, ["first_rsvp_attending"]),
+  },
+  {
+    step: "Оставили отзыв",
+    total: (user) => user.feedbacks.length > 0 || userHasEventCode(user, ["first_feedback_completed"]),
+    recent: (user) =>
+      user.feedbacks.some((feedback) => isWithinLastDays(feedback.created_at, 30)) ||
+      userHasRecentEventCode(user, ["first_feedback_completed"]),
+  },
+];
+
+function buildFunnelData(users: PreparedUser[]): FunnelRow[] {
+  return FUNNEL_STEP_DEFS.map((definition) => ({
+    step: definition.step,
+    total: countUsersWith(users, definition.total),
+    recent: countUsersWith(users, definition.recent),
+  }));
+}
+
+function getPrimaryAttentionLabel(user: PreparedUser) {
+  if (user.profile?.blocker_reason) return humanizeBlockerReason(user.profile.blocker_reason);
+  if (user.attentionBucket) return humanizeBucket(user.attentionBucket);
+  return null;
+}
+
+function buildBucketSummaryData(users: PreparedUser[]): BucketSummary[] {
   const counts = new Map<string, number>();
 
   users.forEach((user) => {
-    if (!user.attentionBucket) return;
-    counts.set(user.attentionBucket, (counts.get(user.attentionBucket) ?? 0) + 1);
+    const bucket = getPrimaryAttentionLabel(user);
+    if (!bucket) return;
+    counts.set(bucket, (counts.get(bucket) ?? 0) + 1);
   });
 
   return [...counts.entries()]
@@ -1112,11 +1728,9 @@ export async function getBucketSummaryData(filters: DashboardFilters): Promise<B
     .sort((left, right) => right.users - left.users || left.bucket.localeCompare(right.bucket, "ru"));
 }
 
-export async function getStuckUsersData(filters: DashboardFilters): Promise<StuckUserRecord[]> {
-  const users = await getFilteredUsers(filters);
-
+function buildStuckUsersData(users: PreparedUser[]): StuckUserRecord[] {
   return users
-    .filter((user) => user.attentionBucket)
+    .filter((user) => Boolean(getPrimaryAttentionLabel(user)))
     .sort((left, right) => compareDesc(left.attentionReferenceAt ?? left.lastActionAt, right.attentionReferenceAt ?? right.lastActionAt))
     .slice(0, 200)
     .map((user) => ({
@@ -1126,14 +1740,12 @@ export async function getStuckUsersData(filters: DashboardFilters): Promise<Stuc
       status: humanizeStatus(user.user.status),
       paymentProvider: humanizeProvider(user.paymentProvider),
       lastEvent: user.lastEvent,
-      lastEventAt: user.lastEventAt,
-      stuckBucket: humanizeBucket(user.attentionBucket),
+      lastEventAt: formatDateTimeLabel(user.lastEventAt),
+      stuckBucket: getPrimaryAttentionLabel(user),
     }));
 }
 
-export async function getSignalFeedData(filters: DashboardFilters): Promise<SignalFeedRecord[]> {
-  const users = await getFilteredUsers(filters);
-
+function buildSignalFeedData(users: PreparedUser[]): SignalFeedRecord[] {
   return users
     .flatMap((user) =>
       user.timeline.slice(0, 6).map((event) => ({
@@ -1149,7 +1761,323 @@ export async function getSignalFeedData(filters: DashboardFilters): Promise<Sign
       })),
     )
     .sort((left, right) => compareDesc(left.createdAt, right.createdAt))
-    .slice(0, 18);
+    .slice(0, 18)
+    .map((signal) => ({
+      ...signal,
+      createdAt: formatDateTimeLabel(signal.createdAt),
+    }));
+}
+
+function buildQueueOverviewData(users: PreparedUser[]): OverviewMetric[] {
+  const totalUsers = users.length;
+  if (!ANALYTICS_CONSUMER_FIELDS_ENABLED) {
+    const checkoutDrop = countUsersWith(users, (user) => getLegacyQueueBucket(user) === QUEUE_BUCKETS.checkoutDrop);
+    const pendingUsers = countUsersWith(users, (user) => getLegacyQueueBucket(user) === QUEUE_BUCKETS.pending);
+    const coldUsers = countUsersWith(users, (user) => getLegacyQueueBucket(user) === QUEUE_BUCKETS.cold);
+    const withAttention = countUsersWith(users, (user) => Boolean(user.attentionBucket));
+    const warmUsers = checkoutDrop + pendingUsers;
+
+    return [
+      {
+        key: "queue-total",
+        label: "В очереди",
+        count: totalUsers,
+        rate: null,
+        tone: "neutral",
+        helper: "Все пользователи до покупки, которые требуют ручного разбора.",
+      },
+      {
+        key: "queue-warm",
+        label: "Близко к оплате",
+        count: warmUsers,
+        rate: totalUsers > 0 ? warmUsers / totalUsers : null,
+        tone: "accent",
+        helper: "Открыли оплату или уже думают об оплате, но ещё не купили.",
+      },
+      {
+        key: "queue-pending",
+        label: "Нет реакции 7 дней",
+        count: coldUsers,
+        rate: totalUsers > 0 ? coldUsers / totalUsers : null,
+        tone: "neutral",
+        helper: "Зашли в бот, но давно не сделали следующий шаг.",
+      },
+      {
+        key: "queue-attention",
+        label: "Понятно, где застряли",
+        count: withAttention,
+        rate: totalUsers > 0 ? withAttention / totalUsers : null,
+        tone: "primary",
+        helper: "Есть понятная причина, почему человек не дошёл до покупки.",
+      },
+    ];
+  }
+
+  const checkout48h = countUsersWith(users, (user) => user.profile?.blocker_reason === "checkout_no_payment_48h");
+  const newNoActivation = countUsersWith(users, (user) => user.profile?.blocker_reason === "new_no_activation_7d");
+  const withKnownBlocker = countUsersWith(users, (user) => Boolean(user.profile?.blocker_reason));
+  const warmUsers = checkout48h + countUsersWith(users, (user) => user.profile?.blocker_reason === "checkout_no_payment_24h");
+
+  return [
+    {
+      key: "queue-total",
+      label: "В очереди",
+      count: totalUsers,
+      rate: null,
+      tone: "neutral",
+      helper: "Все пользователи до покупки, которые требуют ручного разбора.",
+    },
+    {
+      key: "queue-warm",
+      label: "Близко к оплате",
+      count: warmUsers,
+      rate: totalUsers > 0 ? warmUsers / totalUsers : null,
+      tone: "accent",
+      helper: "Уже дошли до оплаты, но пока не завершили покупку.",
+    },
+    {
+      key: "queue-new-no-activation",
+      label: "Новый без реакции",
+      count: newNoActivation,
+      rate: totalUsers > 0 ? newNoActivation / totalUsers : null,
+      tone: "primary",
+      helper: "Новые пользователи, которые так и не включились в путь до оплаты.",
+    },
+    {
+      key: "queue-known-blockers",
+      label: "Понятно, где застряли",
+      count: withKnownBlocker,
+      rate: totalUsers > 0 ? withKnownBlocker / totalUsers : null,
+      tone: "accent",
+      helper: "Есть явная причина, почему человек не дошёл до покупки.",
+    },
+  ];
+}
+
+function buildQueueFunnelData(users: PreparedUser[]): FunnelRow[] {
+  return buildFunnelData(users);
+}
+
+function isOpsQueueUser(user: PreparedUser) {
+  return Boolean(getOpsQueueLabel(user));
+}
+
+function buildQueueBucketSummaryData(users: PreparedUser[]): BucketSummary[] {
+  const counts = new Map<string, number>();
+
+  users.forEach((user) => {
+    const bucket = getOpsQueueLabel(user);
+    if (!bucket) return;
+    counts.set(bucket, (counts.get(bucket) ?? 0) + 1);
+  });
+
+  return [...counts.entries()]
+    .map(([bucket, count]) => ({ bucket, users: count }))
+    .sort(
+      (left, right) =>
+        right.users - left.users ||
+        left.bucket.localeCompare(right.bucket, "ru"),
+    );
+}
+
+function buildQueueUsersData(users: PreparedUser[]): StuckUserRecord[] {
+  return users
+    .filter((user) => Boolean(getOpsQueueLabel(user)))
+    .sort((left, right) => {
+      const bucketDiff = queuePriorityForUser(left) - queuePriorityForUser(right);
+      if (bucketDiff !== 0) return bucketDiff;
+      return compareDesc(left.user.last_pay_click_at ?? left.lastActionAt, right.user.last_pay_click_at ?? right.lastActionAt);
+    })
+    .slice(0, 200)
+    .map((user) => ({
+      telegramId: String(user.user.telegram_id),
+      fullName: user.user.full_name,
+      username: user.user.username,
+      status: humanizeStatus(user.user.status),
+      paymentProvider: humanizeProvider(user.paymentProvider),
+      lastEvent: user.lastEvent,
+      lastEventAt: formatDateTimeLabel(user.lastEventAt),
+      stuckBucket: getOpsQueueLabel(user),
+    }));
+}
+
+const OPS_LANE_DEFS: Array<{
+  id: string;
+  title: string;
+  description: string;
+  blockerReasons: string[];
+}> = [
+  {
+    id: "intro_no_action",
+    title: "Не включился после старта",
+    description: "Человек зашёл, но не сделал первый осмысленный шаг.",
+    blockerReasons: ["intro_no_action_10m", "new_no_activation_24h", "new_no_activation_7d"],
+  },
+  {
+    id: "state_not_selected",
+    title: "Не выбрал свою ситуацию",
+    description: "Дошёл до выбора, но не завершил его.",
+    blockerReasons: ["state_not_selected_10m"],
+  },
+  {
+    id: "schedule_no_payment",
+    title: "Смотрел программу, но не пошёл дальше",
+    description: "Интерес был, но до оплаты человек не дошёл.",
+    blockerReasons: ["schedule_no_payment_24h", "offer_no_next_step_24h", "more_info_no_payment_24h"],
+  },
+  {
+    id: "checkout_no_payment",
+    title: "Открыл оплату, но не купил",
+    description: "Самая горячая зона: человек уже почти купил, но остановился.",
+    blockerReasons: [
+      "payment_flow_no_tariff_2h",
+      "tariff_selected_no_checkout_30m",
+      "checkout_no_payment_2h",
+      "checkout_no_payment_24h",
+      "checkout_no_payment_48h",
+      "payment_failed_provider",
+      "pending_reminder_thinking_clicked",
+      "pending_reminder_question_clicked",
+      "pending_reminder_payment_clicked",
+    ],
+  },
+];
+
+function buildOpsLanesData(users: PreparedUser[]): OpsLaneData[] {
+  if (!ANALYTICS_CONSUMER_FIELDS_ENABLED) {
+    const legacyLanes = [
+      {
+        id: "checkout_drop",
+        title: "Открыл оплату, но не купил",
+        description: "Человек уже открыл оплату, но не завершил покупку.",
+        bucket: QUEUE_BUCKETS.checkoutDrop,
+      },
+      {
+        id: "payment_flow_drop",
+        title: "Дошёл до оплаты, но остановился",
+        description: "Интерес к покупке был, но до открытия оплаты человек не дошёл.",
+        bucket: QUEUE_BUCKETS.paymentFlowDrop,
+      },
+      {
+        id: "pending",
+        title: "Думает об оплате",
+        description: "Есть интерес, но решение о покупке ещё не принято.",
+        bucket: QUEUE_BUCKETS.pending,
+      },
+      {
+        id: "cold",
+        title: "Нет реакции",
+        description: "После входа в бот человек давно не сделал следующий шаг.",
+        bucket: QUEUE_BUCKETS.cold,
+      },
+    ] as const;
+
+    return legacyLanes
+      .map((lane) => {
+        const cards = users
+          .filter((user) => {
+            const bucket = getLegacyQueueBucket(user);
+            if (lane.bucket === QUEUE_BUCKETS.cold) {
+              return bucket === QUEUE_BUCKETS.cold || bucket === QUEUE_BUCKETS.newLead;
+            }
+            return bucket === lane.bucket;
+          })
+          .sort((left, right) => compareDesc(left.lastEventAt ?? left.lastActionAt, right.lastEventAt ?? right.lastActionAt))
+          .slice(0, 60)
+          .map((user) => ({
+            telegramId: String(user.user.telegram_id),
+            fullName: user.user.full_name,
+            username: user.user.username,
+            status: humanizeStatus(user.user.status),
+            paymentProvider: humanizeProvider(user.paymentProvider),
+            lastEvent: user.lastEvent,
+            lastEventAt: formatDateTimeLabel(user.lastEventAt),
+            stuckBucket: getOpsQueueLabel(user) ?? humanizeBucket(user.attentionBucket),
+          }));
+
+        return {
+          id: lane.id,
+          title: lane.title,
+          description: lane.description,
+          cards,
+        };
+      })
+      .filter((lane) => lane.cards.length > 0);
+  }
+
+  return OPS_LANE_DEFS.map((lane) => {
+    const cards = users
+      .filter((user) => lane.blockerReasons.includes(user.profile?.blocker_reason ?? ""))
+      .sort((left, right) => compareDesc(left.lastEventAt ?? left.lastActionAt, right.lastEventAt ?? right.lastActionAt))
+      .slice(0, 60)
+      .map((user) => ({
+        telegramId: String(user.user.telegram_id),
+        fullName: user.user.full_name,
+        username: user.user.username,
+        status: humanizeStatus(user.user.status),
+        paymentProvider: humanizeProvider(user.paymentProvider),
+        lastEvent: user.lastEvent,
+        lastEventAt: formatDateTimeLabel(user.lastEventAt),
+        stuckBucket: humanizeBlockerReason(user.profile?.blocker_reason) || humanizeJourneyStep(user.profile?.journey_step),
+      }));
+
+    return {
+      id: lane.id,
+      title: lane.title,
+      description: lane.description,
+      cards,
+    };
+  }).filter((lane) => lane.cards.length > 0);
+}
+
+export async function getAnalyticsRolloutData(): Promise<AnalyticsRolloutSummary> {
+  const preparedData = await loadPreparedData();
+  return buildAnalyticsRolloutData(preparedData?.users ?? []);
+}
+
+export async function getOverviewData(filters: DashboardFilters): Promise<OverviewMetric[]> {
+  return buildOverviewData(await getFilteredUsers(filters));
+}
+
+export async function getFunnelData(filters: DashboardFilters): Promise<FunnelRow[]> {
+  return buildFunnelData(await getFilteredUsers(filters));
+}
+
+export async function getTrendData(filters: DashboardFilters): Promise<TrendPoint[]> {
+  const users = await getFilteredUsers(filters);
+  return buildTrendPoints(users, normalizeFilters(filters));
+}
+
+export async function getBucketSummaryData(filters: DashboardFilters): Promise<BucketSummary[]> {
+  return buildBucketSummaryData(await getFilteredUsers(filters));
+}
+
+export async function getStuckUsersData(filters: DashboardFilters): Promise<StuckUserRecord[]> {
+  return buildStuckUsersData(await getFilteredUsers(filters));
+}
+
+export async function getSignalFeedData(filters: DashboardFilters): Promise<SignalFeedRecord[]> {
+  return buildSignalFeedData(await getFilteredUsers(filters));
+}
+
+export async function getQueueOverviewData(filters: DashboardFilters): Promise<OverviewMetric[]> {
+  return buildQueueOverviewData((await getFilteredUsers(filters)).filter(isOpsQueueUser));
+}
+
+export async function getQueueFunnelData(filters: DashboardFilters): Promise<FunnelRow[]> {
+  return buildQueueFunnelData((await getFilteredUsers(filters)).filter(isOpsQueueUser));
+}
+
+export async function getQueueBucketSummaryData(filters: DashboardFilters): Promise<BucketSummary[]> {
+  return buildQueueBucketSummaryData((await getFilteredUsers(filters)).filter(isOpsQueueUser));
+}
+
+export async function getQueueUsersData(filters: DashboardFilters): Promise<StuckUserRecord[]> {
+  return buildQueueUsersData((await getFilteredUsers(filters)).filter(isOpsQueueUser));
+}
+
+export async function getQueueSignalsData(filters: DashboardFilters): Promise<SignalFeedRecord[]> {
+  return buildSignalFeedData((await getFilteredUsers(filters)).filter(isOpsQueueUser));
 }
 
 export async function getUserJourneyData(telegramId: string): Promise<{
@@ -1172,56 +2100,66 @@ export async function getUserJourneyData(telegramId: string): Promise<{
       full_name: user.user.full_name,
       username: user.user.username,
       status: humanizeStatus(user.user.status),
-      registration_date: user.user.registration_date,
-      subscription_end_date: user.user.subscription_end_date,
+      registration_date: formatDateTimeLabel(user.user.registration_date),
+      subscription_end_date: formatDateLabel(user.user.subscription_end_date),
       onboarding_version: user.profile?.onboarding_version ?? "—",
       entry_source: user.profile?.entry_source ?? "—",
       last_event: user.lastEvent,
-      last_event_at: user.lastEventAt,
+      last_event_at: formatDateTimeLabel(user.lastEventAt),
       state_choice: user.profile?.state_choice ?? user.user.language_level ?? "—",
       payment_provider: humanizeProvider(user.paymentProvider),
-      first_paid_at: user.firstPaidAt,
-      first_rsvp_at: user.firstRsvpAt,
-      first_feedback_at: user.firstFeedbackAt,
-      stuck_bucket: user.attentionBucket,
+      journey_stage: humanizeJourneyStage(user.currentJourneyStage),
+      journey_step: humanizeJourneyStep(user.profile?.journey_step),
+      blocker_reason: humanizeBlockerReason(user.profile?.blocker_reason),
+      last_message_key: humanizeMessageKey(user.profile?.last_message_key),
+      next_expected_event: user.profile?.next_expected_event ? humanizeEventName(user.profile?.next_expected_event) : "—",
+      time_in_step: user.timeInStep ?? "—",
+      first_paid_at: formatDateTimeLabel(user.firstPaidAt),
+      first_rsvp_at: formatDateTimeLabel(user.firstRsvpAt),
+      first_feedback_at: formatDateTimeLabel(user.firstFeedbackAt),
+      stuck_bucket: humanizeBucket(user.attentionBucket ?? getOpsQueueLabel(user)),
       payments_count: String(user.successPayments.length),
       total_paid: String(Math.round(user.totalPaid)),
-      last_payment_at: user.lastPaymentAt,
+      last_payment_at: formatDateTimeLabel(user.lastPaymentAt),
       rsvp_count: String(user.attendingRsvps.length),
       feedback_count: String(user.feedbacks.length),
       actions_7d: String(user.actions7d),
       actions_30d: String(user.actions30d),
-      last_action_at: user.lastActionAt,
+      last_action_at: formatDateTimeLabel(user.lastActionAt),
     },
-    timeline: user.timeline.slice(0, 200),
+    timeline: user.timeline.slice(0, 200).map((event) => ({
+      ...event,
+      journey: humanizeJourneyStage(event.journey),
+      messageKey: humanizeMessageKey(event.messageKey),
+      blockerReason: humanizeBlockerReason(event.blockerReason),
+      createdAt: formatDateTimeLabel(event.createdAt),
+    })),
   };
 }
 
 export async function getConversionData(filters: DashboardFilters): Promise<ConversionRecord[]> {
-  const users = await getFilteredUsers(filters);
+  const users = await getFilteredUsers(filters, "calls");
   const groups = new Map<string, ConversionRecord>();
 
-  users
-    .filter((user) => user.successPayments.length > 0)
-    .forEach((user) => {
-      const status = humanizeStatus(user.user.status);
-      const provider = humanizeProvider(user.paymentProvider);
-      const key = `${status}:${provider}`;
-      const group = groups.get(key) ?? {
-        status,
-        paymentProvider: provider,
-        paymentsCount: 0,
-        paidUsers: 0,
-        rsvpUsers: 0,
-        feedbackUsers: 0,
-      };
+  users.forEach((user) => {
+    const status = humanizeStatus(user.user.status);
+    const provider = humanizeProvider(user.paymentProvider);
+    const key = `${status}:${provider}`;
+    const group = groups.get(key) ?? {
+      status,
+      paymentProvider: provider,
+      paymentsCount: 0,
+      paidUsers: 0,
+      rsvpUsers: 0,
+      feedbackUsers: 0,
+    };
 
-      group.paymentsCount += user.successPayments.length;
-      group.paidUsers += 1;
-      group.rsvpUsers += user.attendingRsvps.length > 0 ? 1 : 0;
-      group.feedbackUsers += user.feedbacks.length > 0 ? 1 : 0;
-      groups.set(key, group);
-    });
+    group.paymentsCount += user.successPayments.length;
+    group.paidUsers += 1;
+    group.rsvpUsers += user.attendingRsvps.length > 0 ? 1 : 0;
+    group.feedbackUsers += user.feedbacks.length > 0 ? 1 : 0;
+    groups.set(key, group);
+  });
 
   return [...groups.values()].sort(
     (left, right) =>
@@ -1232,7 +2170,7 @@ export async function getConversionData(filters: DashboardFilters): Promise<Conv
 }
 
 export async function getStudentPortfolioSummary(filters: DashboardFilters): Promise<StudentPortfolioSummary> {
-  const paidUsers = (await getFilteredUsers(filters)).filter((user) => user.successPayments.length > 0);
+  const paidUsers = await getFilteredUsers(filters, "calls");
 
   if (paidUsers.length === 0) {
     return {
@@ -1242,6 +2180,9 @@ export async function getStudentPortfolioSummary(filters: DashboardFilters): Pro
       avgActions30d: 0,
       avgRating: null,
       noFeedbackCount: 0,
+      attendedUsers: 0,
+      feedbackUsers: 0,
+      withoutRsvpCount: 0,
     };
   }
 
@@ -1254,11 +2195,14 @@ export async function getStudentPortfolioSummary(filters: DashboardFilters): Pro
     avgActions30d: Math.round((paidUsers.reduce((sum, user) => sum + user.actions30d, 0) / paidUsers.length) * 10) / 10,
     avgRating: ratings.length > 0 ? Math.round((ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length) * 10) / 10 : null,
     noFeedbackCount: paidUsers.filter((user) => user.feedbacks.length === 0).length,
+    attendedUsers: paidUsers.filter((user) => user.attendingRsvps.length > 0).length,
+    feedbackUsers: paidUsers.filter((user) => user.feedbacks.length > 0).length,
+    withoutRsvpCount: paidUsers.filter((user) => user.attendingRsvps.length === 0).length,
   };
 }
 
 export async function getStudentsData(filters: DashboardFilters): Promise<StudentRow[]> {
-  const users = (await getFilteredUsers(filters)).filter((user) => user.successPayments.length > 0);
+  const users = await getFilteredUsers(filters, "calls");
 
   return users
     .sort((left, right) => {
@@ -1276,14 +2220,116 @@ export async function getStudentsData(filters: DashboardFilters): Promise<Studen
       paymentProvider: humanizeProvider(user.paymentProvider),
       paymentsCount: user.successPayments.length,
       totalPaid: user.totalPaid,
-      lastPaymentAt: user.lastPaymentAt,
+      lastPaymentAt: formatDateTimeLabel(user.lastPaymentAt),
       actions7d: user.actions7d,
       actions30d: user.actions30d,
-      lastActionAt: user.lastActionAt,
+      lastActionAt: formatDateTimeLabel(user.lastActionAt),
       attendingCount: user.attendingRsvps.length,
       feedbackCount: user.feedbacks.length,
       avgRating: user.avgRating,
     }));
+}
+
+export async function getCallSessionsData(filters: DashboardFilters): Promise<CallSessionRecord[]> {
+  const [paidUsers, rawData] = await Promise.all([getFilteredUsers(filters, "calls"), loadRawData()]);
+  const broadcastsById = new Map((rawData?.broadcasts ?? []).map((broadcast) => [broadcast.id, broadcast]));
+  const sessions = new Map<
+    number,
+    {
+      id: number;
+      eventTitle: string;
+      eventDate: string | null;
+      attendees: number;
+      declines: number;
+      feedbacks: number;
+      ratings: number[];
+      lastTouchAt: string | null;
+    }
+  >();
+
+  paidUsers.forEach((user) => {
+    user.rsvps.forEach((rsvp) => {
+      const broadcast = broadcastsById.get(rsvp.broadcast_id);
+      const existing = sessions.get(rsvp.broadcast_id) ?? {
+        id: rsvp.broadcast_id,
+        eventTitle: broadcast?.rsvp_event_title ?? broadcast?.content_text ?? "Созвон",
+        eventDate: broadcast?.rsvp_event_datetime ?? null,
+        attendees: 0,
+        declines: 0,
+        feedbacks: 0,
+        ratings: [],
+        lastTouchAt: null,
+      };
+
+      if (rsvp.response === "attending") {
+        existing.attendees += 1;
+      } else {
+        existing.declines += 1;
+      }
+
+      existing.lastTouchAt = [existing.lastTouchAt, rsvp.created_at].sort(compareDesc)[0] ?? existing.lastTouchAt;
+      sessions.set(rsvp.broadcast_id, existing);
+    });
+
+    user.feedbacks.forEach((feedback) => {
+      const broadcast = broadcastsById.get(feedback.broadcast_id);
+      const existing = sessions.get(feedback.broadcast_id) ?? {
+        id: feedback.broadcast_id,
+        eventTitle: broadcast?.rsvp_event_title ?? broadcast?.content_text ?? "Созвон",
+        eventDate: broadcast?.rsvp_event_datetime ?? null,
+        attendees: 0,
+        declines: 0,
+        feedbacks: 0,
+        ratings: [],
+        lastTouchAt: null,
+      };
+
+      existing.feedbacks += 1;
+      if (feedback.rating != null) {
+        existing.ratings.push(feedback.rating);
+      }
+      existing.lastTouchAt = [existing.lastTouchAt, feedback.created_at].sort(compareDesc)[0] ?? existing.lastTouchAt;
+      sessions.set(feedback.broadcast_id, existing);
+    });
+  });
+
+  return [...sessions.values()]
+    .sort((left, right) => compareDesc(left.eventDate ?? left.lastTouchAt, right.eventDate ?? right.lastTouchAt))
+    .slice(0, 24)
+    .map((session) => ({
+      id: String(session.id),
+      eventTitle: session.eventTitle,
+      eventDate: formatDateTimeLabel(session.eventDate),
+      attendees: session.attendees,
+      declines: session.declines,
+      feedbacks: session.feedbacks,
+      avgRating: session.ratings.length > 0 ? Math.round((session.ratings.reduce((sum, rating) => sum + rating, 0) / session.ratings.length) * 10) / 10 : null,
+    }));
+}
+
+export async function getFeedbackHighlightsData(filters: DashboardFilters): Promise<FeedbackHighlightRecord[]> {
+  const [paidUsers, rawData] = await Promise.all([getFilteredUsers(filters, "calls"), loadRawData()]);
+  const broadcastsById = new Map((rawData?.broadcasts ?? []).map((broadcast) => [broadcast.id, broadcast]));
+
+  return paidUsers
+    .flatMap((user) =>
+      user.feedbacks.map((feedback) => {
+        const broadcast = broadcastsById.get(feedback.broadcast_id);
+        return {
+          id: String(feedback.id),
+          telegramId: String(user.user.telegram_id),
+          fullName: user.user.full_name,
+          username: user.user.username,
+          eventTitle: broadcast?.rsvp_event_title ?? broadcast?.content_text ?? "Созвон",
+          eventDate: formatDateTimeLabel(broadcast?.rsvp_event_datetime ?? null),
+          rating: feedback.rating,
+          comment: feedback.improvement_comment,
+          createdAt: formatDateTimeLabel(feedback.created_at ?? "—"),
+        };
+      }),
+    )
+    .sort((left, right) => compareDesc(left.createdAt, right.createdAt))
+    .slice(0, 18);
 }
 
 export async function getUserPaymentsData(telegramId: string): Promise<PaymentRecord[]> {
@@ -1294,7 +2340,7 @@ export async function getUserPaymentsData(telegramId: string): Promise<PaymentRe
 
   return user.payments.slice(0, 20).map((payment) => ({
     id: String(payment.id),
-    date: payment.created_at ?? "—",
+    date: formatDateTimeLabel(payment.created_at ?? "—"),
     amount: toNumber(payment.amount),
     provider: humanizeProvider(payment.provider),
     status: humanizePaymentStatus(payment.status),
@@ -1315,9 +2361,9 @@ export async function getUserRsvpsData(telegramId: string): Promise<RsvpRecord[]
     return {
       id: String(rsvp.id),
       eventTitle: broadcast?.rsvp_event_title ?? broadcast?.content_text ?? "Без названия",
-      eventDate: broadcast?.rsvp_event_datetime ?? null,
+      eventDate: formatDateTimeLabel(broadcast?.rsvp_event_datetime ?? null),
       response: humanizeRsvp(rsvp.response),
-      createdAt: rsvp.created_at ?? "—",
+      createdAt: formatDateTimeLabel(rsvp.created_at ?? "—"),
     };
   });
 }
@@ -1336,19 +2382,20 @@ export async function getUserFeedbacksData(telegramId: string): Promise<Feedback
     return {
       id: String(feedback.id),
       eventTitle: broadcast?.rsvp_event_title ?? broadcast?.content_text ?? "Без названия",
-      eventDate: broadcast?.rsvp_event_datetime ?? null,
+      eventDate: formatDateTimeLabel(broadcast?.rsvp_event_datetime ?? null),
       rating: feedback.rating,
       comment: feedback.improvement_comment,
       level: humanizeLevel(feedback.level_comfort),
       nextVisit: humanizeNextVisit(feedback.will_attend_next),
-      createdAt: feedback.created_at ?? "—",
+      createdAt: formatDateTimeLabel(feedback.created_at ?? "—"),
     };
   });
 }
 
 async function computeDashboardPageData(filters: DashboardFilters, focusTelegramId?: string | null): Promise<DashboardPageData> {
-  const [overview, trend, funnel, buckets, stuckUsers, conversions, signals, studentSummary, students, journey, payments, rsvps, feedbacks] =
+  const [analyticsRollout, overview, trend, funnel, buckets, stuckUsers, conversions, signals, studentSummary, students, journey, payments, rsvps, feedbacks] =
     await Promise.all([
+      getAnalyticsRolloutData(),
       getOverviewData(filters),
       getTrendData(filters),
       getFunnelData(filters),
@@ -1365,6 +2412,7 @@ async function computeDashboardPageData(filters: DashboardFilters, focusTelegram
     ]);
 
   return {
+    analyticsRollout,
     overview,
     trend,
     funnel,
@@ -1382,9 +2430,44 @@ async function computeDashboardPageData(filters: DashboardFilters, focusTelegram
 }
 
 async function computeOpsPageData(filters: DashboardFilters, focusTelegramId?: string | null): Promise<OpsPageData> {
-  const [users, buckets, journey, payments, rsvps, feedbacks] = await Promise.all([
-    getStuckUsersData(filters),
-    getBucketSummaryData(filters),
+  const [analyticsRollout, filteredUsers, journey, payments, rsvps, feedbacks] = await Promise.all([
+    getAnalyticsRolloutData(),
+    getFilteredUsers(filters, "queue"),
+    focusTelegramId ? getUserJourneyData(focusTelegramId) : Promise.resolve(null),
+    focusTelegramId ? getUserPaymentsData(focusTelegramId) : Promise.resolve([]),
+    focusTelegramId ? getUserRsvpsData(focusTelegramId) : Promise.resolve([]),
+    focusTelegramId ? getUserFeedbacksData(focusTelegramId) : Promise.resolve([]),
+  ]);
+  const queueUsers = filteredUsers.filter(isOpsQueueUser);
+
+  const overview = buildQueueOverviewData(queueUsers);
+  const funnel = buildQueueFunnelData(queueUsers);
+  const users = buildQueueUsersData(queueUsers);
+  const buckets = buildQueueBucketSummaryData(queueUsers);
+  const lanes = buildOpsLanesData(queueUsers);
+  const signals = buildSignalFeedData(queueUsers);
+
+  return {
+    analyticsRollout,
+    overview,
+    funnel,
+    users,
+    buckets,
+    lanes,
+    signals,
+    journey,
+    payments,
+    rsvps,
+    feedbacks,
+  };
+}
+
+async function computeCallsPageData(filters: DashboardFilters, focusTelegramId?: string | null): Promise<CallsPageData> {
+  const [studentSummary, sessions, feedbackHighlights, students, journey, payments, rsvps, feedbacks] = await Promise.all([
+    getStudentPortfolioSummary(filters),
+    getCallSessionsData(filters),
+    getFeedbackHighlightsData(filters),
+    getStudentsData(filters),
     focusTelegramId ? getUserJourneyData(focusTelegramId) : Promise.resolve(null),
     focusTelegramId ? getUserPaymentsData(focusTelegramId) : Promise.resolve([]),
     focusTelegramId ? getUserRsvpsData(focusTelegramId) : Promise.resolve([]),
@@ -1392,8 +2475,10 @@ async function computeOpsPageData(filters: DashboardFilters, focusTelegramId?: s
   ]);
 
   return {
-    users,
-    buckets,
+    studentSummary,
+    sessions,
+    feedbackHighlights,
+    students,
     journey,
     payments,
     rsvps,
@@ -1417,4 +2502,13 @@ export async function getOpsPageData(filters: DashboardFilters, focusTelegramId?
   }
 
   return computeOpsPageData(filters, focusTelegramId);
+}
+
+export async function getCallsPageData(filters: DashboardFilters, focusTelegramId?: string | null): Promise<CallsPageData> {
+  if (!hasDatabaseUrl()) {
+    const remoteData = await fetchRemotePageData<CallsPageData>("/dashboard/api/calls-data", filters, focusTelegramId);
+    if (remoteData) return remoteData;
+  }
+
+  return computeCallsPageData(filters, focusTelegramId);
 }
