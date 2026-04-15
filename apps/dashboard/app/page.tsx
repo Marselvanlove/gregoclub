@@ -1,37 +1,29 @@
-import { logoutAction } from "@/app/login/actions";
-import { requireDashboardAuth } from "@/lib/auth";
+import { Sparkles } from "lucide-react";
+import { AttentionTable } from "@/components/dashboard/attention-table";
+import { AppShellNav } from "@/components/dashboard/app-shell";
+import { AutoRefresh } from "@/components/dashboard/auto-refresh";
+import { ChartShell } from "@/components/dashboard/chart-shell";
+import { FiltersBar } from "@/components/dashboard/filters-bar";
+import { KpiCard } from "@/components/dashboard/kpi-card";
+import { OverviewCharts } from "@/components/dashboard/overview-charts";
+import { StudentsTable } from "@/components/dashboard/students-table";
+import { UserDetailSheet } from "@/components/dashboard/user-detail-sheet";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-  getConversionData,
-  getFunnelData,
-  getOverviewData,
-  getStuckUsersData,
-  getUserJourneyData,
+  getDashboardPageData,
 } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
 
-function formatRate(rate: number | null): string {
-  if (rate === null) {
-    return "—";
-  }
+function formatRate(rate: number | null) {
+  if (rate === null) return "—";
   return `${Math.round(rate * 100)}%`;
 }
 
-function FilterField({
-  label,
-  name,
-  defaultValue,
-}: {
-  label: string;
-  name: string;
-  defaultValue?: string | null;
-}) {
-  return (
-    <label>
-      <div className="muted">{label}</div>
-      <input className="input" name={name} defaultValue={defaultValue ?? ""} />
-    </label>
-  );
+function readValue(params: Record<string, string | string[] | undefined>, key: string) {
+  const value = params[key];
+  return Array.isArray(value) ? value[0] : value;
 }
 
 export default async function DashboardPage({
@@ -39,323 +31,254 @@ export default async function DashboardPage({
 }: {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  await requireDashboardAuth();
   const params = (await searchParams) ?? {};
-  const value = (key: string) => {
-    const raw = params[key];
-    return Array.isArray(raw) ? raw[0] : raw;
-  };
 
   const filters = {
-    from: value("from") ?? null,
-    to: value("to") ?? null,
-    source: value("source") ?? null,
-    state: value("state") ?? null,
-    tariff: value("tariff") ?? null,
-    provider: value("provider") ?? null,
-    onboardingVersion: value("onboardingVersion") ?? null,
+    from: readValue(params, "from") ?? null,
+    to: readValue(params, "to") ?? null,
+    source: readValue(params, "source") ?? null,
+    state: readValue(params, "state") ?? null,
+    status: readValue(params, "status") ?? null,
+    tariff: readValue(params, "tariff") ?? null,
+    provider: readValue(params, "provider") ?? null,
+    onboardingVersion: readValue(params, "onboardingVersion") ?? null,
   };
+  const focusTelegramId = readValue(params, "focus") ?? null;
 
-  const journeyTelegramId = value("telegramId") ?? null;
+  const { overview, trend, funnel, buckets, stuckUsers, conversions, signals, studentSummary, students, journey, payments, rsvps, feedbacks } =
+    await getDashboardPageData(filters, focusTelegramId);
 
-  const [overview, funnel, stuckUsers, conversions, journey] = await Promise.all([
-    getOverviewData(filters),
-    getFunnelData(filters),
-    getStuckUsersData(filters),
-    getConversionData(filters),
-    journeyTelegramId ? getUserJourneyData(journeyTelegramId) : Promise.resolve(null),
-  ]);
+  const spotlightBuckets = buckets.slice(0, 4);
 
   return (
-    <main>
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">Grego Club Analytics</h1>
-          <p className="page-subtitle">
-            Онбординг `/starts1`, оплата, CRM и activation в одном admin-only dashboard.
-            Основной акцент: где пользователи застряли, что посмотрели и где теряется конверсия.
-          </p>
-        </div>
-        <form action={logoutAction} className="logout-form">
-          <button type="submit">Выйти</button>
-        </form>
-      </div>
-
-      <section className="panel">
-        <div className="section-header">
-          <div>
-            <h2>Фильтры</h2>
-            <p>Фильтры применяются к overview, funnel, stuck users и conversions.</p>
-          </div>
-        </div>
-        <form className="filter-form">
-          <FilterField label="From (YYYY-MM-DD)" name="from" defaultValue={filters.from} />
-          <FilterField label="To (YYYY-MM-DD)" name="to" defaultValue={filters.to} />
-          <FilterField label="Source" name="source" defaultValue={filters.source} />
-          <FilterField label="State" name="state" defaultValue={filters.state} />
-          <FilterField label="Tariff" name="tariff" defaultValue={filters.tariff} />
-          <FilterField label="Provider" name="provider" defaultValue={filters.provider} />
-          <FilterField label="Onboarding Version" name="onboardingVersion" defaultValue={filters.onboardingVersion} />
-          <button type="submit">Применить</button>
-        </form>
-      </section>
-
-      <section className="panel">
-        <div className="section-header">
-          <div>
-            <h2>Overview</h2>
-            <p>Ключевые показатели нового онбординга `/starts1`.</p>
-          </div>
-        </div>
-        <div className="metrics-grid">
-          {overview.map((item) => (
-            <div className="metric-card" key={item.key}>
-              <div className="label">{item.label}</div>
-              <div className="value">{item.count}</div>
-              <div className="rate">{item.rate === null ? "Без rate" : `Rate: ${formatRate(item.rate)}`}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="panel">
-        <div className="section-header">
-          <div>
-            <h2>Funnel</h2>
-            <p>Сравнение `/starts1` и legacy `/starts` по основным шагам.</p>
-          </div>
-        </div>
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Step</th>
-              <th>/starts1</th>
-              <th>Legacy</th>
-            </tr>
-          </thead>
-          <tbody>
-            {funnel.map((row) => (
-              <tr key={row.step}>
-                <td>{row.step}</td>
-                <td>{row.starts1}</td>
-                <td>{row.legacy}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
-
-      <section className="subgrid">
-        <div className="panel">
-          <div className="section-header">
-            <div>
-              <h2>Where Users Get Stuck</h2>
-              <p>Snapshot по активным stuck bucket-правилам.</p>
-            </div>
-          </div>
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>User</th>
-                <th>Status</th>
-                <th>Source</th>
-                <th>State</th>
-                <th>Last Event</th>
-                <th>Bucket</th>
-              </tr>
-            </thead>
-            <tbody>
-              {stuckUsers.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="muted">
-                    В активных stuck bucket сейчас пусто.
-                  </td>
-                </tr>
-              ) : (
-                stuckUsers.map((row) => (
-                  <tr key={`${row.telegramId}-${row.stuckBucket}`}>
-                    <td>
-                      <strong>{row.fullName ?? "Без имени"}</strong>
-                      <div className="muted">
-                        {row.username ? `@${row.username}` : row.telegramId}
-                      </div>
-                    </td>
-                    <td>{row.status ?? "—"}</td>
-                    <td>{row.entrySource ?? "—"}</td>
-                    <td>{row.stateChoice ?? "—"}</td>
-                    <td>
-                      {row.lastEvent ?? "—"}
-                      <div className="muted">{row.lastEventAt ?? "—"}</div>
-                    </td>
-                    <td>
-                      <span className="badge">{row.stuckBucket ?? "—"}</span>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="panel">
-          <div className="section-header">
-            <div>
-              <h2>CRM / Ops</h2>
-              <p>Быстрый user journey lookup по Telegram ID.</p>
-            </div>
-          </div>
-          <form className="journey-form">
-            <FilterField label="Telegram ID" name="telegramId" defaultValue={journeyTelegramId} />
-            <button type="submit">Открыть journey</button>
-          </form>
-          <p className="page-subtitle">
-            Используйте этот блок для follow-up: pending, paid without RSVP, attended without feedback.
-          </p>
-        </div>
-      </section>
-
-      <section className="panel">
-        <div className="section-header">
-          <div>
-            <h2>Conversions</h2>
-            <p>Сводка по source / state / tariff / provider.</p>
-          </div>
-        </div>
-        <table className="data-table">
-          <thead>
-            <tr>
-              <th>Source</th>
-              <th>State</th>
-              <th>Tariff</th>
-              <th>Provider</th>
-              <th>Starts</th>
-              <th>Checkout Clicks</th>
-              <th>Paid Users</th>
-            </tr>
-          </thead>
-          <tbody>
-            {conversions.length === 0 ? (
-              <tr>
-                <td colSpan={7} className="muted">
-                  Нет данных по выбранным фильтрам.
-                </td>
-              </tr>
-            ) : (
-              conversions.map((row) => (
-                <tr key={`${row.entrySource}-${row.stateChoice}-${row.tariff}-${row.paymentProvider}`}>
-                  <td>{row.entrySource}</td>
-                  <td>{row.stateChoice}</td>
-                  <td>{row.tariff}</td>
-                  <td>{row.paymentProvider}</td>
-                  <td>{row.starts}</td>
-                  <td>{row.checkoutClicks}</td>
-                  <td>{row.paidUsers}</td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </section>
-
-      {journey ? (
-        <section className="subgrid">
-          <div className="panel">
-            <div className="section-header">
-              <div>
-                <h2>User Journey</h2>
-                <p>Полный таймлайн событий пользователя.</p>
+    <>
+      <AppShellNav />
+      <main className="dashboard-shell pb-16">
+        <AutoRefresh className="mb-6" />
+        <section className="glass-panel overflow-hidden rounded-[calc(var(--radius)+0.2rem)] px-6 py-7 md:px-8 md:py-8">
+          <div className="grid gap-8 xl:grid-cols-[1.25fr_0.75fr]">
+            <div className="space-y-6">
+              <div className="space-y-4">
+                <div className="micro-label">Аналитика</div>
+                <h1 className="max-w-4xl text-[clamp(2.6rem,5vw,5rem)] font-semibold leading-[0.92] tracking-[-0.07em] text-foreground">
+                  Аналитика GregoClub
+                </h1>
+                <p className="max-w-3xl text-base leading-7 text-muted-foreground md:text-lg">
+                  Живые цифры из продовой базы: регистрации, оплаты, записи на встречи и отзывы.
+                </p>
               </div>
             </div>
-            <div className="timeline-list">
-              {journey.timeline.length === 0 ? (
-                <div className="muted">Для этого Telegram ID пока нет событий.</div>
+
+            <div className="grid gap-4">
+              <div className="rounded-[calc(var(--radius)-0.2rem)] border border-border/60 bg-white/60 p-5 shadow-[var(--shadow-soft)]">
+                <div className="micro-label">Сейчас важно</div>
+                <p className="mt-3 text-sm leading-7 text-muted-foreground">
+                  Смотрите, кто завис перед оплатой, кто оплатил без записи на встречу и где ещё не собран feedback.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="pulse" className="space-y-6">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {overview.map((item) => (
+              <KpiCard
+                key={item.key}
+                label={item.label}
+                value={item.key === "revenue" ? `${item.count} €` : item.rate === null ? String(item.count) : `${item.count} · ${formatRate(item.rate)}`}
+                helper={item.helper}
+                tone={item.tone}
+              />
+            ))}
+          </div>
+
+          <FiltersBar initialValues={filters} />
+
+          <OverviewCharts trend={trend} funnel={funnel} />
+        </section>
+
+        <section id="funnel" className="mt-8 grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+          <ChartShell
+            label="Причины"
+            title="Где нужна ручная работа"
+            description="Главные причины, по которым пользователям сейчас нужно внимание."
+            action={<Sparkles className="size-4 text-accent" />}
+          >
+            <div className="space-y-3">
+              {spotlightBuckets.length === 0 ? (
+                <div className="rounded-[calc(var(--radius)-0.35rem)] border border-dashed border-border/60 bg-white/50 px-4 py-8 text-sm text-muted-foreground">
+                  Сейчас нет активных проблемных сегментов.
+                </div>
               ) : (
-                journey.timeline.map((event) => (
-                  <div className="timeline-item" key={event.id}>
-                    <time>{event.createdAt}</time>
-                    <strong>{event.eventName}</strong>
-                    <div className="muted">
-                      {event.journey} · {event.onboardingVersion} · {event.stepKey ?? "—"} · {event.source ?? "—"}
+                spotlightBuckets.map((bucket) => (
+                  <div
+                    key={bucket.bucket}
+                    className="flex items-center justify-between rounded-[calc(var(--radius)-0.45rem)] border border-border/60 bg-white/58 px-4 py-3"
+                  >
+                    <div className="space-y-1">
+                      <div className="micro-label">Причина</div>
+                      <div className="font-medium text-foreground">{bucket.bucket}</div>
                     </div>
-                    {event.metadata ? <code>{JSON.stringify(event.metadata)}</code> : null}
+                    <div className="text-3xl font-semibold tracking-[-0.05em] text-primary">{bucket.users}</div>
                   </div>
                 ))
               )}
             </div>
+          </ChartShell>
+
+          <ChartShell
+            label="Срезы"
+            title="Разрез по платящим клиентам"
+            description="Группировка по текущему статусу и провайдеру оплаты."
+          >
+            <ScrollArea className="w-full">
+              <div className="min-w-[720px]">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border/50">
+                      {["Статус", "Оплата", "Платежей", "Плательщиков", "С записью", "С отзывом"].map((item) => (
+                        <th key={item} className="px-3 py-3 text-left micro-label">
+                          {item}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {conversions.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="px-3 py-8 text-center text-muted-foreground">
+                          Нет срезов по текущим фильтрам.
+                        </td>
+                      </tr>
+                    ) : (
+                      conversions.slice(0, 10).map((row) => (
+                        <tr key={`${row.status}-${row.paymentProvider}`} className="border-b border-border/40">
+                          <td className="px-3 py-3">{row.status}</td>
+                          <td className="px-3 py-3">{row.paymentProvider}</td>
+                          <td className="px-3 py-3 font-medium text-foreground">{row.paymentsCount}</td>
+                          <td className="px-3 py-3">{row.paidUsers}</td>
+                          <td className="px-3 py-3">{row.rsvpUsers}</td>
+                          <td className="px-3 py-3 text-primary">{row.feedbackUsers}</td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </ScrollArea>
+          </ChartShell>
+        </section>
+
+        <section id="attention" className="mt-8 space-y-6">
+          <ChartShell
+            label="Клиенты"
+            title="Кому нужно внимание"
+            description="Список клиентов, где стоит вмешаться вручную."
+          >
+            <AttentionTable rows={stuckUsers} />
+          </ChartShell>
+        </section>
+
+        <section id="signals" className="mt-8 grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+          <ChartShell
+            label="Последние действия"
+            title="Что произошло недавно"
+            description="Последние реальные события по пользователям из базы."
+          >
+            <div className="space-y-3">
+              {signals.length === 0 ? (
+                <div className="rounded-[calc(var(--radius)-0.35rem)] border border-dashed border-border/60 bg-white/50 px-4 py-8 text-sm text-muted-foreground">
+                  Лента сигналов пуста.
+                </div>
+              ) : (
+                signals.map((signal) => (
+                  <div key={`${signal.telegramId}-${signal.createdAt}-${signal.eventName}`} className="rounded-[calc(var(--radius)-0.4rem)] border border-border/60 bg-white/58 p-4">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge variant="primary">{signal.eventName}</Badge>
+                      {signal.provider ? <Badge variant="accent">{signal.provider}</Badge> : null}
+                      <span className="text-xs text-muted-foreground">{signal.createdAt}</span>
+                    </div>
+                    <div className="mt-3 text-sm text-foreground">
+                      {signal.fullName ?? "Без имени"} {signal.username ? `· @${signal.username}` : ""}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </ChartShell>
+
+          <ChartShell
+            label="Коротко"
+            title="Как использовать дашборд"
+            description="Три простых вопроса для ежедневной работы."
+          >
+            <div className="space-y-4 text-sm leading-7 text-muted-foreground">
+              <p>
+                <strong className="text-foreground">Сколько живых регистраций и оплат прошло за окно?</strong>
+              </p>
+              <p>
+                <strong className="text-foreground">Кто завис перед оплатой или после неё?</strong>
+              </p>
+              <p>
+                <strong className="text-foreground">Где уже есть встречи, но ещё нет отзывов?</strong>
+              </p>
+            </div>
+          </ChartShell>
+        </section>
+
+        <section className="mt-8 space-y-6">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+            <KpiCard
+              label="Платят сейчас"
+              value={String(studentSummary.currentPaid)}
+              helper="Сколько учеников сейчас с активной оплатой."
+              tone="primary"
+            />
+            <KpiCard
+              label="Больше не платят"
+              value={String(studentSummary.formerPaid)}
+              helper="Сколько учеников платили раньше, но сейчас оплата не активна."
+              tone="accent"
+            />
+            <KpiCard
+              label="Выручка"
+              value={`${studentSummary.revenueTotal.toFixed(0)} €`}
+              helper="Сумма успешных оплат по всем ученикам."
+              tone="primary"
+            />
+            <KpiCard
+              label="Действия в боте"
+              value={String(studentSummary.avgActions30d)}
+              helper="Среднее число зафиксированных действий за 30 дней."
+              tone="neutral"
+            />
+            <KpiCard
+              label="Без отзывов"
+              value={String(studentSummary.noFeedbackCount)}
+              helper={studentSummary.avgRating == null ? "Сколько платящих учеников ещё не оставляли отзывы." : `Средняя оценка: ${studentSummary.avgRating}`}
+              tone="neutral"
+            />
           </div>
 
-          <div className="panel">
-            <div className="section-header">
-              <div>
-                <h2>User Summary</h2>
-                <p>Snapshot для CRM и дашборда.</p>
-              </div>
-            </div>
-            {!journey.summary ? (
-              <div className="muted">Пользователь не найден.</div>
-            ) : (
-              <table className="data-table">
-                <tbody>
-                  <tr>
-                    <th>Имя</th>
-                    <td>{journey.summary.full_name ?? "—"}</td>
-                  </tr>
-                  <tr>
-                    <th>Username</th>
-                    <td>{journey.summary.username ? `@${journey.summary.username}` : "—"}</td>
-                  </tr>
-                  <tr>
-                    <th>Status</th>
-                    <td>{journey.summary.status ?? "—"}</td>
-                  </tr>
-                  <tr>
-                    <th>Onboarding</th>
-                    <td>{journey.summary.onboarding_version ?? "—"}</td>
-                  </tr>
-                  <tr>
-                    <th>Entry Source</th>
-                    <td>{journey.summary.entry_source ?? "—"}</td>
-                  </tr>
-                  <tr>
-                    <th>Last Event</th>
-                    <td>{journey.summary.last_event ?? "—"}</td>
-                  </tr>
-                  <tr>
-                    <th>State</th>
-                    <td>{journey.summary.state_choice ?? "—"}</td>
-                  </tr>
-                  <tr>
-                    <th>Payment Provider</th>
-                    <td>{journey.summary.payment_provider ?? "—"}</td>
-                  </tr>
-                  <tr>
-                    <th>First Paid</th>
-                    <td>{journey.summary.first_paid_at ?? "—"}</td>
-                  </tr>
-                  <tr>
-                    <th>First RSVP</th>
-                    <td>{journey.summary.first_rsvp_at ?? "—"}</td>
-                  </tr>
-                  <tr>
-                    <th>First Feedback</th>
-                    <td>{journey.summary.first_feedback_at ?? "—"}</td>
-                  </tr>
-                  <tr>
-                    <th>Stuck Bucket</th>
-                    <td>{journey.summary.stuck_bucket ?? "—"}</td>
-                  </tr>
-                  <tr>
-                    <th>Payments / RSVP / Feedback</th>
-                    <td>
-                      {journey.summary.payments_count} / {journey.summary.rsvp_count} / {journey.summary.feedback_count}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            )}
-          </div>
+          <ChartShell
+            label="Ученики"
+            title="Платящие и бывшие ученики"
+            description="Здесь собрана вся известная информация по оплатам, активности, встречам и отзывам."
+          >
+            <StudentsTable rows={students} />
+          </ChartShell>
         </section>
-      ) : null}
-    </main>
+      </main>
+
+      <UserDetailSheet
+        summary={journey?.summary ?? null}
+        timeline={journey?.timeline ?? []}
+        payments={payments}
+        rsvps={rsvps}
+        feedbacks={feedbacks}
+        open={Boolean(focusTelegramId)}
+      />
+    </>
   );
 }

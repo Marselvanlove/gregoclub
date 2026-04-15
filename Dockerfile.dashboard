@@ -1,0 +1,14 @@
+FROM node:25-bookworm-slim
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
+
+COPY apps/dashboard/.next/standalone ./
+COPY apps/dashboard/.next/static ./apps/dashboard/.next/static
+
+EXPOSE 3000
+
+CMD ["node", "apps/dashboard/server.js"]

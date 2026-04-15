@@ -26,6 +26,7 @@ from services.scheduler import create_scheduler
 from web.lavatop_webhook import create_lavatop_webhook_endpoint
 from web.salebot_webhook import create_salebot_webhook_endpoint
 from web.checkout_redirect import create_checkout_redirect_endpoint
+from web.dashboard_proxy import create_dashboard_proxy_endpoint
 from web.stripe_webhook import create_stripe_webhook_endpoint
 
 
@@ -151,6 +152,8 @@ async def main() -> None:
         session_factory, bot, config, gspread_client
     )
     app.include_router(salebot_webhook_router)
+    dashboard_proxy_router = create_dashboard_proxy_endpoint()
+    app.include_router(dashboard_proxy_router)
 
     # Создаём и запускаем планировщик задач (APScheduler)
     scheduler = create_scheduler(

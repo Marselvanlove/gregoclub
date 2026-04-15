@@ -15,6 +15,7 @@ services:
 
     environment:
       GOOGLE_CREDS_FILE: /app/secrets/google_sheet_creds.json
+      DASHBOARD_UPSTREAM_URL: http://dashboard:3000
     
     # Порт для FastAPI (Stripe webhooks) - только локально для healthcheck
     ports:
@@ -36,6 +37,38 @@ services:
       start_period: 15s
     
     # Логирование
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.dashboard
+    container_name: gregoclub-dashboard
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: sqlite+aiosqlite:///./data/app.db
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+    ports:
+      - "127.0.0.1:${HOST_DASHBOARD_PORT:-3000}:3000"
+    volumes:
+      - ./data:/app/data:ro
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:3000/dashboard/api/overview').then((response) => { if (!response.ok) process.exit(1); }).catch(() => process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
     logging:
       driver: "json-file"
       options:
