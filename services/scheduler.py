@@ -76,6 +76,7 @@ from bot.keyboards.inline import (
     get_feedback_start_keyboard,
     get_followup_schedule_keyboard,
     get_group_join_check_keyboard,
+    get_pending_reminder_keyboard,
     get_rsvp_buttons_keyboard,
     get_rsvp_only_decline_keyboard,
 )
@@ -440,7 +441,12 @@ async def send_pending_reminders(
                 try:
                     first_name = user.full_name.split()[0] if user.full_name else "Друг"
                     text = format_text(template, first_name=first_name)
-                    await bot.send_message(chat_id=user.telegram_id, text=text)
+                    reply_markup = get_pending_reminder_keyboard() if step == 1 else None
+                    await bot.send_message(
+                        chat_id=user.telegram_id,
+                        text=text,
+                        reply_markup=reply_markup,
+                    )
                     await increment_pending_reminder_step(session, user.telegram_id)
                     await _track_scheduler_event(
                         session,
@@ -1346,13 +1352,13 @@ def create_scheduler(
 
     scheduler.add_job(
         send_pending_reminders,
-        trigger=IntervalTrigger(minutes=10),
+        trigger=IntervalTrigger(minutes=1),
         args=[session_factory, bot, config, gspread_client],
         id="send_pending_reminders",
         name="Напоминания для pending",
         replace_existing=True,
     )
-    logger.info("Задача 'send_pending_reminders' добавлена (каждые 10 минут)")
+    logger.info("Задача 'send_pending_reminders' добавлена (каждую минуту)")
 
     # Задача: Кик неавторизованных пользователей (каждые 5 минут)
     scheduler.add_job(

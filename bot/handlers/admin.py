@@ -102,6 +102,7 @@ def _get_segment_display(segment: str, level: Optional[str] = None) -> str:
         "all": "Все пользователи",
         "new": "Новые (New)",
         "pending": "Думающие (Pending)",
+        "thinking": "Пока думаю",
         "active": "Активные",
         "expired": "Истёкшие",
         INACTIVE_PARTICIPANTS_SEGMENT: "Неактивные (пропустили 5 последних встреч)",

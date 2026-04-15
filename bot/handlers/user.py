@@ -20,6 +20,8 @@ from bot.keyboards import (
     get_language_level_keyboard,
     get_tariff_keyboard,
     get_payment_link_keyboard,
+    get_pending_curator_keyboard,
+    get_pending_manager_keyboard,
     get_subscription_manage_keyboard,
     get_welcome_keyboard,
     get_calendar_keyboard,
@@ -38,6 +40,9 @@ from bot.texts import (
     NEW_LEVEL_SELECTED,
     TARIFF_SELECT,
     PENDING_CHECKOUT,
+    PENDING_REMINDER_PAYMENT_HELP_REPLY,
+    PENDING_REMINDER_QUESTION_REPLY,
+    PENDING_REMINDER_THINKING_REPLY,
     PAYMENT_ERROR,
     ACTIVE_STATUS,
     PENDING_STATUS,
@@ -54,8 +59,10 @@ from database.requests import (
     get_recent_pending_payment_orders,
     get_user_analytics_profile,
     get_user_by_telegram_id,
+    mark_user_thinking_for_broadcast,
     mark_user_pay_click,
     save_user_email,
+    snooze_pending_followup_for_day,
     update_payment_order_status,
     update_user_language_level,
     update_user_status,
@@ -251,6 +258,15 @@ async def _build_customer_portal_url(
     except Exception as e:
         logger.warning("Не удалось создать customer portal для user=%s: %s", user.telegram_id, e)
         return None
+
+
+async def _dismiss_pending_reminder_keyboard(callback: CallbackQuery) -> None:
+    if callback.message is None:
+        return
+    try:
+        await callback.message.edit_reply_markup(reply_markup=None)
+    except Exception:
+        logger.debug("Не удалось убрать клавиатуру pending reminder", exc_info=True)
 
 
 async def _create_lava_payment(
@@ -485,9 +501,9 @@ async def cmd_start(
         full_name=user.full_name,
     )
 
-    from bot.handlers.starts_onboarding import send_starts_onboarding
+    from bot.handlers.starts_onboarding import send_starts1_onboarding
 
-    await send_starts_onboarding(message, session, config, gspread_client, source="/start")
+    await send_starts1_onboarding(message, session, config, gspread_client, source="/start")
 
 
 @router.callback_query(F.data.startswith("level:"))
@@ -783,6 +799,92 @@ async def callback_action_pay(
         source="action:pay",
         onboarding_version=await _resolve_user_onboarding_version(session, callback.from_user.id),
         gspread_client=gspread_client,
+    )
+
+
+@router.callback_query(F.data == "pending_reminder:question")
+async def callback_pending_reminder_question(
+    callback: CallbackQuery,
+    session: AsyncSession,
+    config: Config,
+    gspread_client: Optional[gspread.Client] = None,
+) -> None:
+    if callback.from_user is None or callback.message is None:
+        return
+
+    await callback.answer()
+    await _dismiss_pending_reminder_keyboard(callback)
+    await callback.message.answer(
+        format_text(PENDING_REMINDER_QUESTION_REPLY, first_name=callback.from_user.first_name or "Друг"),
+        reply_markup=get_pending_curator_keyboard(),
+    )
+    await _sync_user_reporting(
+        session=session,
+        config=config,
+        gspread_client=gspread_client,
+        telegram_id=callback.from_user.id,
+        event_name="pending_reminder_question_clicked",
+        journey="payment",
+        step_key="pending_reminder:question",
+        source="pending_reminder",
+    )
+
+
+@router.callback_query(F.data == "pending_reminder:payment")
+async def callback_pending_reminder_payment(
+    callback: CallbackQuery,
+    session: AsyncSession,
+    config: Config,
+    gspread_client: Optional[gspread.Client] = None,
+) -> None:
+    if callback.from_user is None or callback.message is None:
+        return
+
+    await callback.answer()
+    await _dismiss_pending_reminder_keyboard(callback)
+    await callback.message.answer(
+        format_text(PENDING_REMINDER_PAYMENT_HELP_REPLY, first_name=callback.from_user.first_name or "Друг"),
+        reply_markup=get_pending_manager_keyboard(),
+    )
+    await _sync_user_reporting(
+        session=session,
+        config=config,
+        gspread_client=gspread_client,
+        telegram_id=callback.from_user.id,
+        event_name="pending_reminder_payment_clicked",
+        journey="payment",
+        step_key="pending_reminder:payment",
+        source="pending_reminder",
+    )
+
+
+@router.callback_query(F.data == "pending_reminder:thinking")
+async def callback_pending_reminder_thinking(
+    callback: CallbackQuery,
+    session: AsyncSession,
+    config: Config,
+    gspread_client: Optional[gspread.Client] = None,
+) -> None:
+    if callback.from_user is None or callback.message is None:
+        return
+
+    await callback.answer()
+    await _dismiss_pending_reminder_keyboard(callback)
+    await snooze_pending_followup_for_day(session, callback.from_user.id)
+    await mark_user_thinking_for_broadcast(session, callback.from_user.id)
+    await callback.message.answer(
+        format_text(PENDING_REMINDER_THINKING_REPLY, first_name=callback.from_user.first_name or "Друг"),
+    )
+    await _sync_user_reporting(
+        session=session,
+        config=config,
+        gspread_client=gspread_client,
+        telegram_id=callback.from_user.id,
+        event_name="pending_reminder_thinking_clicked",
+        journey="payment",
+        step_key="pending_reminder:thinking",
+        source="pending_reminder",
+        metadata={"followup_delay_hours": 24},
     )
 
 

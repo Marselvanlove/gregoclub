@@ -207,6 +207,36 @@ class UserAnalyticsProfile(Base):
         return f"<UserAnalyticsProfile(tg_id={self.telegram_id}, stuck={self.stuck_bucket})>"
 
 
+class ThinkingMailingRecipient(Base):
+    """
+    Категория пользователей, выбравших ветку «Пока думаю».
+    Используется как отдельный сегмент для рассылок.
+    """
+    __tablename__ = "thinking_mailing_recipients"
+    __table_args__ = (
+        UniqueConstraint("telegram_id", name="uq_thinking_mailing_recipients_telegram_id"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    user_id: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
+    telegram_id: Mapped[int] = mapped_column(BigInteger, nullable=False, index=True)
+    source: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
+        onupdate=func.now(),
+    )
+
+    def __repr__(self) -> str:
+        return f"<ThinkingMailingRecipient(tg_id={self.telegram_id}, source={self.source})>"
+
+
 class PaymentOrder(Base):
     """
     Таблица payment_orders — заказы на платежи.

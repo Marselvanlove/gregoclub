@@ -346,26 +346,25 @@ async def send_starts1_onboarding(
     session: AsyncSession,
     config: Config,
     gspread_client: Optional[gspread.Client] = None,
-    source: str = "/starts1",
+    source: str = "/start",
 ) -> None:
     try:
-        await _sync_starts_onboarding_reporting(
-            session=session,
-            config=config,
-            gspread_client=gspread_client,
-            telegram_id=message.from_user.id,
-            onboarding_version="starts1",
-            event_name="onboarding_started",
-            step_key="start",
-            source=source,
-        )
-
         try:
             await message.answer_video_note(
                 video_note=VIDEO_NOTE_ID,
                 reply_markup=ReplyKeyboardRemove(),
             )
             logger.info("starts1_onboarding step=video_note_sent user=%s source=%s", message.from_user.id, source)
+            await _sync_starts_onboarding_reporting(
+                session=session,
+                config=config,
+                gspread_client=gspread_client,
+                telegram_id=message.from_user.id,
+                onboarding_version="starts1",
+                event_name="onboarding_started",
+                step_key="start",
+                source=source,
+            )
             await _sync_starts_onboarding_reporting(
                 session=session,
                 config=config,
@@ -380,6 +379,16 @@ async def send_starts1_onboarding(
             error_text = str(e).upper()
             if "VOICE_MESSAGES_FORBIDDEN" in error_text:
                 await _hide_reply_keyboard(message)
+                await _sync_starts_onboarding_reporting(
+                    session=session,
+                    config=config,
+                    gspread_client=gspread_client,
+                    telegram_id=message.from_user.id,
+                    onboarding_version="starts1",
+                    event_name="onboarding_started",
+                    step_key="start",
+                    source=source,
+                )
                 logger.warning(
                     "starts1_onboarding step=video_note_skipped user=%s source=%s reason=%s",
                     message.from_user.id,

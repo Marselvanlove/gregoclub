@@ -6,6 +6,8 @@ from typing import Optional
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
+ULTIMAGREGO_URL = "https://t.me/ultimagrego_bot"
+
 
 # =============================================================================
 # КЛАВИАТУРЫ ДЛЯ /start — выбор уровня языка
@@ -67,6 +69,45 @@ def get_payment_link_keyboard(payment_url: str) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.row(
         InlineKeyboardButton(text="💳 Оплатить", url=payment_url),
+    )
+    return builder.as_markup()
+
+
+def get_pending_reminder_keyboard() -> InlineKeyboardMarkup:
+    """
+    Клавиатура первого pending-напоминания с развилкой по возражению.
+    """
+    builder = InlineKeyboardBuilder()
+    builder.row(
+        InlineKeyboardButton(text="Есть вопрос", callback_data="pending_reminder:question"),
+    )
+    builder.row(
+        InlineKeyboardButton(text="Не могу оплатить", callback_data="pending_reminder:payment"),
+    )
+    builder.row(
+        InlineKeyboardButton(text="Пока думаю", callback_data="pending_reminder:thinking"),
+    )
+    return builder.as_markup()
+
+
+def get_pending_curator_keyboard() -> InlineKeyboardMarkup:
+    """
+    CTA после выбора «Есть вопрос».
+    """
+    builder = InlineKeyboardBuilder()
+    builder.row(
+        InlineKeyboardButton(text="Написать куратору", url=ULTIMAGREGO_URL),
+    )
+    return builder.as_markup()
+
+
+def get_pending_manager_keyboard() -> InlineKeyboardMarkup:
+    """
+    CTA после выбора «Не могу оплатить».
+    """
+    builder = InlineKeyboardBuilder()
+    builder.row(
+        InlineKeyboardButton(text="Написать менеджеру", url=ULTIMAGREGO_URL),
     )
     return builder.as_markup()
 
@@ -218,6 +259,9 @@ def get_broadcast_segment_keyboard() -> InlineKeyboardMarkup:
         InlineKeyboardButton(text="🤔 Думают (Pending)", callback_data="broadcast:pending"),
     )
     builder.row(
+        InlineKeyboardButton(text="💭 Пока думаю", callback_data="broadcast:thinking"),
+    )
+    builder.row(
         InlineKeyboardButton(text="✅ Активные", callback_data="broadcast:active"),
     )
     builder.row(
@@ -289,6 +333,9 @@ def get_scheduled_segment_keyboard() -> InlineKeyboardMarkup:
     )
     builder.row(
         InlineKeyboardButton(text="🤔 Думают (Pending)", callback_data="sched_seg:pending"),
+    )
+    builder.row(
+        InlineKeyboardButton(text="💭 Пока думаю", callback_data="sched_seg:thinking"),
     )
     builder.row(
         InlineKeyboardButton(text="✅ Активные", callback_data="sched_seg:active"),
@@ -708,7 +755,7 @@ def get_starts_keyboard() -> InlineKeyboardMarkup:
     builder.row(
         InlineKeyboardButton(
             text="Есть вопрос? (Задать менеджеру)",
-            url="https://t.me/ultimagrego_bot"
+            url=ULTIMAGREGO_URL
         ),
     )
     

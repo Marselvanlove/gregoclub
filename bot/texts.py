@@ -207,11 +207,17 @@ PENDING_CHECKOUT = """Тариф: {period}
 
 # pending_reminder_1: Первое напоминание (через 2 часа после выбора тарифа)
 # Отправляется: scheduler, pending_reminder_step = 0, через 2 часа после last_pay_click_at
-PENDING_REMINDER_1 = """{first_name}, возникли сложности с оплатой?
+PENDING_REMINDER_1 = """{first_name}, всё в порядке? 😊
 
-Напишите менеджеру — он поможет с оплатой любой валютой.
+Если остались вопросы по клубу — с удовольствием отвечу."""
 
-👉 @ultimagrego_bot"""
+PENDING_REMINDER_QUESTION_REPLY = """{first_name}, напишите свой вопрос нашему куратору — она подскажет."""
+
+PENDING_REMINDER_PAYMENT_HELP_REPLY = """{first_name}, если не получается оплатить сейчас, напишите менеджеру — он поможет с оплатой в любой валюте."""
+
+PENDING_REMINDER_THINKING_REPLY = """{first_name}, хорошо, не тороплю.
+
+Если захотите вернуться к оплате раньше — кнопка /pay всегда доступна."""
 
 # pending_reminder_2: Второе напоминание (через 24 часа)
 # Отправляется: scheduler, pending_reminder_step = 1, через 24 часа после last_pay_click_at

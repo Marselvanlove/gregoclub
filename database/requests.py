@@ -25,6 +25,7 @@ from database.models import (
     RSVPResponse,
     ScheduledBroadcast,
     Setting,
+    ThinkingMailingRecipient,
     UserAnalyticsProfile,
     User,
     UserStatus,
@@ -150,6 +151,49 @@ async def increment_pending_reminder_step(session: AsyncSession, telegram_id: in
     await session.commit()
 
 
+async def snooze_pending_followup_for_day(session: AsyncSession, telegram_id: int) -> None:
+    """
+    Переносит следующий pending follow-up на сутки от текущего момента.
+    Используется для ветки «Пока думаю».
+    """
+    stmt = (
+        update(User)
+        .where(User.telegram_id == telegram_id)
+        .values(last_pay_click_at=datetime.utcnow(), pending_reminder_step=1)
+    )
+    await session.execute(stmt)
+    await session.commit()
+
+
+async def mark_user_thinking_for_broadcast(
+    session: AsyncSession,
+    telegram_id: int,
+    *,
+    source: str = "pending_reminder:thinking",
+) -> None:
+    """
+    Сохраняет пользователя в отдельную категорию рассылки «Пока думаю».
+    Повторный клик обновляет запись, а не создаёт дубликат.
+    """
+    user = await get_user_by_telegram_id(session, telegram_id)
+    stmt = select(ThinkingMailingRecipient).where(ThinkingMailingRecipient.telegram_id == telegram_id)
+    existing = (await session.execute(stmt)).scalar_one_or_none()
+
+    if existing is None:
+        session.add(
+            ThinkingMailingRecipient(
+                user_id=user.id if user else None,
+                telegram_id=telegram_id,
+                source=source,
+            )
+        )
+    else:
+        existing.user_id = user.id if user else existing.user_id
+        existing.source = source
+
+    await session.commit()
+
+
 async def mark_expiry_warning_sent(session: AsyncSession, telegram_id: int) -> None:
     stmt = update(User).where(User.telegram_id == telegram_id).values(expiry_warning_sent_at=datetime.utcnow())
     await session.execute(stmt)
@@ -266,7 +310,7 @@ async def get_expired_users(session: AsyncSession) -> Sequence[User]:
 async def get_pending_users_for_reminder(session: AsyncSession, step: int) -> Sequence[User]:
     """
     PENDING напоминания:
-    step=1: через 2 часа — помощь с оплатой
+    step=1: через 2 часа — развилка по возражению
     step=2: через 24 часа
     step=3: через 48 часов
     """
@@ -985,6 +1029,18 @@ async def get_users_for_broadcast_segment(session: AsyncSession, segment: str) -
         return await get_users_by_status(session, UserStatus.new)
     if segment == "pending":
         return await get_users_by_status(session, UserStatus.pending)
+    if segment == "thinking":
+        stmt = (
+            select(User)
+            .join(
+                ThinkingMailingRecipient,
+                ThinkingMailingRecipient.telegram_id == User.telegram_id,
+            )
+            .where(User.status == UserStatus.pending)
+            .order_by(User.full_name.asc().nullslast(), User.username.asc().nullslast(), User.telegram_id.asc())
+        )
+        result = await session.execute(stmt)
+        return result.scalars().all()
     if segment == "active":
         return await get_users_by_status(session, UserStatus.active)
     if segment == "expired":
