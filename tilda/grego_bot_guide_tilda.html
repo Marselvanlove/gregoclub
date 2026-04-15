@@ -1,0 +1,702 @@
+<style>
+  #gcb-guide,
+  #gcb-guide * {
+    box-sizing: border-box !important;
+  }
+
+  #gcb-guide {
+    --gcb-bg: #f7f5ef !important;
+    --gcb-surface: #ffffff !important;
+    --gcb-ink: #1f2b3d !important;
+    --gcb-text: #4f5d70 !important;
+    --gcb-muted: #7b8798 !important;
+    --gcb-line: #dde5f1 !important;
+    --gcb-accent: #3457bc !important;
+    --gcb-accent-soft: #edf2ff !important;
+    --gcb-shadow: 0 14px 34px rgba(24, 38, 72, 0.06) !important;
+    width: 100% !important;
+    padding: 24px 0 40px !important;
+    color: var(--gcb-text) !important;
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif !important;
+    background:
+      linear-gradient(180deg, #fbfaf6 0%, #f4f6fb 100%) !important;
+  }
+
+  #gcb-guide a {
+    color: inherit !important;
+    text-decoration: none !important;
+  }
+
+  #gcb-guide .gcb-wrap {
+    width: min(1080px, calc(100% - 28px)) !important;
+    margin: 0 auto !important;
+  }
+
+  #gcb-guide .gcb-panel {
+    margin-bottom: 16px !important;
+    padding: 28px !important;
+    border: 1px solid var(--gcb-line) !important;
+    border-radius: 24px !important;
+    background: var(--gcb-surface) !important;
+    box-shadow: var(--gcb-shadow) !important;
+  }
+
+  #gcb-guide .gcb-hero {
+    display: block !important;
+  }
+
+  #gcb-guide .gcb-kicker {
+    display: inline-flex !important;
+    align-items: center !important;
+    padding: 7px 12px !important;
+    border-radius: 999px !important;
+    background: var(--gcb-accent-soft) !important;
+    color: var(--gcb-accent) !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+  }
+
+  #gcb-guide h1,
+  #gcb-guide h2,
+  #gcb-guide h3 {
+    margin: 0 !important;
+    color: var(--gcb-ink) !important;
+  }
+
+  #gcb-guide h1,
+  #gcb-guide h2 {
+    font-family: "Roboto Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.01em !important;
+  }
+
+  #gcb-guide h1 {
+    margin-top: 16px !important;
+    font-size: clamp(42px, 6vw, 72px) !important;
+    line-height: 0.95 !important;
+    text-transform: uppercase !important;
+    max-width: none !important;
+  }
+
+  #gcb-guide h2 {
+    margin-top: 10px !important;
+    font-size: clamp(28px, 4vw, 42px) !important;
+    line-height: 1 !important;
+    text-transform: uppercase !important;
+  }
+
+  #gcb-guide .gcb-lead {
+    margin: 16px 0 0 !important;
+    max-width: 58ch !important;
+    font-size: 18px !important;
+    line-height: 1.68 !important;
+    color: #37465a !important;
+  }
+
+  #gcb-guide .gcb-actions {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+    margin-top: 20px !important;
+  }
+
+  #gcb-guide .gcb-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-height: 46px !important;
+    padding: 11px 16px !important;
+    border-radius: 14px !important;
+    border: 1px solid transparent !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    white-space: nowrap !important;
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease !important;
+  }
+
+  #gcb-guide .gcb-btn:hover {
+    transform: translateY(-1px) !important;
+  }
+
+  #gcb-guide .gcb-btn-primary {
+    background: var(--gcb-accent) !important;
+    color: #ffffff !important;
+  }
+
+  #gcb-guide .gcb-btn-secondary {
+    background: #ffffff !important;
+    color: var(--gcb-accent) !important;
+    border-color: #ccd7ea !important;
+  }
+
+  #gcb-guide .gcb-inline-note {
+    margin-top: 16px !important;
+    font-size: 14px !important;
+    line-height: 1.6 !important;
+    color: var(--gcb-muted) !important;
+  }
+
+  #gcb-guide .gcb-command-row,
+  #gcb-guide .gcb-info-grid,
+  #gcb-guide .gcb-steps,
+  #gcb-guide .gcb-support-grid {
+    display: grid !important;
+    gap: 12px !important;
+  }
+
+  #gcb-guide .gcb-command-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    margin-top: 20px !important;
+  }
+
+  #gcb-guide .gcb-command,
+  #gcb-guide .gcb-info-card,
+  #gcb-guide .gcb-step,
+  #gcb-guide .gcb-shot,
+  #gcb-guide .gcb-support {
+    border: 1px solid var(--gcb-line) !important;
+    border-radius: 18px !important;
+    background: #ffffff !important;
+  }
+
+  #gcb-guide .gcb-command,
+  #gcb-guide .gcb-info-card,
+  #gcb-guide .gcb-step,
+  #gcb-guide .gcb-support {
+    padding: 16px !important;
+  }
+
+  #gcb-guide .gcb-command span,
+  #gcb-guide .gcb-step .gcb-step-num,
+  #gcb-guide .gcb-shot .gcb-shot-tag {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 30px !important;
+    height: 30px !important;
+    margin-bottom: 10px !important;
+    padding: 0 8px !important;
+    border-radius: 999px !important;
+    background: var(--gcb-accent-soft) !important;
+    color: var(--gcb-accent) !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase !important;
+  }
+
+  #gcb-guide .gcb-command strong,
+  #gcb-guide .gcb-info-card strong,
+  #gcb-guide .gcb-step strong,
+  #gcb-guide .gcb-shot strong,
+  #gcb-guide .gcb-support strong {
+    display: block !important;
+    margin-bottom: 14px !important;
+    font-size: 18px !important;
+    line-height: 1.35 !important;
+    color: var(--gcb-ink) !important;
+  }
+
+  #gcb-guide .gcb-inline-note strong,
+  #gcb-guide .gcb-command p strong,
+  #gcb-guide .gcb-info-card p strong,
+  #gcb-guide .gcb-step p strong,
+  #gcb-guide .gcb-shot p strong,
+  #gcb-guide .gcb-support p strong,
+  #gcb-guide details p strong {
+    display: inline !important;
+    margin: 0 !important;
+    font-size: inherit !important;
+    line-height: inherit !important;
+    font-weight: 700 !important;
+  }
+
+  #gcb-guide .gcb-command p,
+  #gcb-guide .gcb-info-card p,
+  #gcb-guide .gcb-step p,
+  #gcb-guide .gcb-shot p,
+  #gcb-guide .gcb-support p,
+  #gcb-guide .gcb-section-intro {
+    margin: 0 !important;
+    font-size: 15px !important;
+    line-height: 1.65 !important;
+  }
+
+  #gcb-guide .gcb-section-head {
+    max-width: 760px !important;
+    margin-bottom: 18px !important;
+  }
+
+  #gcb-guide .gcb-section-head .gcb-section-intro {
+    margin-top: 14px !important;
+  }
+
+  #gcb-guide .gcb-info-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  #gcb-guide .gcb-steps {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+  }
+
+  #gcb-guide .gcb-step .gcb-step-num {
+    min-width: 32px !important;
+    font-size: 13px !important;
+  }
+
+  #gcb-guide .gcb-shots {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  #gcb-guide .gcb-shot {
+    overflow: hidden !important;
+  }
+
+  #gcb-guide .gcb-shot img {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    background: #161922 !important;
+  }
+
+  #gcb-guide .gcb-shot-copy {
+    padding: 14px !important;
+  }
+
+  #gcb-guide .gcb-shot .gcb-shot-tag {
+    min-width: auto !important;
+    padding: 0 10px !important;
+  }
+
+  #gcb-guide .gcb-faq-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  #gcb-guide .gcb-faq-col {
+    display: grid !important;
+    gap: 12px !important;
+  }
+
+  #gcb-guide details {
+    border: 1px solid var(--gcb-line) !important;
+    border-radius: 18px !important;
+    background: #ffffff !important;
+    overflow: hidden !important;
+  }
+
+  #gcb-guide summary {
+    position: relative !important;
+    display: block !important;
+    padding: 16px 48px 16px 16px !important;
+    cursor: pointer !important;
+    list-style: none !important;
+    font-size: 17px !important;
+    font-weight: 600 !important;
+    line-height: 1.42 !important;
+    color: var(--gcb-ink) !important;
+  }
+
+  #gcb-guide summary::-webkit-details-marker {
+    display: none !important;
+  }
+
+  #gcb-guide summary::after {
+    content: "+" !important;
+    position: absolute !important;
+    top: 12px !important;
+    right: 16px !important;
+    font-size: 28px !important;
+    line-height: 1 !important;
+    color: var(--gcb-accent) !important;
+  }
+
+  #gcb-guide details[open] summary::after {
+    content: "−" !important;
+  }
+
+  #gcb-guide details p {
+    padding: 0 16px 16px !important;
+  }
+
+  #gcb-guide details a,
+  #gcb-guide .gcb-support a {
+    color: var(--gcb-accent) !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+  }
+
+  #gcb-guide details a:hover,
+  #gcb-guide .gcb-support a:hover {
+    text-decoration: underline !important;
+  }
+
+  #gcb-guide .gcb-support-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  @media (max-width: 1040px) {
+    #gcb-guide .gcb-info-grid,
+    #gcb-guide .gcb-support-grid {
+      grid-template-columns: 1fr 1fr !important;
+    }
+
+    #gcb-guide .gcb-steps {
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+
+    #gcb-guide .gcb-shots {
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+  }
+
+  @media (max-width: 760px) {
+    #gcb-guide {
+      padding: 14px 0 28px !important;
+    }
+
+    #gcb-guide .gcb-wrap {
+      width: min(100%, calc(100% - 18px)) !important;
+    }
+
+    #gcb-guide .gcb-panel {
+      padding: 20px !important;
+      border-radius: 20px !important;
+    }
+
+    #gcb-guide .gcb-hero,
+    #gcb-guide .gcb-command-row,
+    #gcb-guide .gcb-info-grid,
+    #gcb-guide .gcb-steps,
+    #gcb-guide .gcb-faq-grid,
+    #gcb-guide .gcb-support-grid,
+    #gcb-guide .gcb-shots {
+      grid-template-columns: 1fr !important;
+    }
+
+    #gcb-guide h1 {
+      font-size: 28px !important;
+      line-height: 0.98 !important;
+      max-width: none !important;
+    }
+
+    #gcb-guide h2 {
+      font-size: 26px !important;
+    }
+
+    #gcb-guide .gcb-actions {
+      display: grid !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 8px !important;
+    }
+
+    #gcb-guide .gcb-btn {
+      min-height: 42px !important;
+      padding: 10px 6px !important;
+      border-radius: 12px !important;
+      font-size: 12px !important;
+    }
+
+    #gcb-guide .gcb-shot-copy {
+      padding: 12px !important;
+    }
+
+    #gcb-guide .gcb-shot strong {
+      font-size: 15px !important;
+      margin-bottom: 6px !important;
+    }
+
+    #gcb-guide .gcb-shot p {
+      font-size: 13px !important;
+      line-height: 1.5 !important;
+    }
+  }
+</style>
+
+<div id="gcb-guide">
+  <div class="gcb-wrap">
+    <section class="gcb-panel gcb-hero">
+      <div>
+        <div class="gcb-kicker">Grego Club · Инструкция</div>
+        <h1>Как пользоваться<br />ботом Grego Club</h1>
+        <p class="gcb-lead">
+          Здесь вы быстро поймёте, где смотреть расписание, как записываться на встречи,
+          где искать Zoom-ссылку и куда писать, если что-то не работает.
+        </p>
+
+        <div class="gcb-actions">
+          <a class="gcb-btn gcb-btn-primary" href="https://t.me/gregoclub_bot" target="_blank" rel="noreferrer">
+            Открыть бота
+          </a>
+          <a class="gcb-btn gcb-btn-secondary" href="https://t.me/ultimagrego_bot" target="_blank" rel="noreferrer">
+            Поддержка
+          </a>
+        </div>
+
+        <p class="gcb-inline-note">
+          Если хотите открыть команды вручную, поставьте <strong>/</strong> в поле ввода Telegram.
+          Бот покажет доступные команды прямо внизу.
+        </p>
+
+        <div class="gcb-command-row">
+          <article class="gcb-command">
+            <span>info</span>
+            <strong>/info</strong>
+            <p>Показывает актуальное расписание, ближайшие темы и ваш статус записи.</p>
+          </article>
+          <article class="gcb-command">
+            <span>status</span>
+            <strong>/status</strong>
+            <p>Личный кабинет: дата окончания подписки и управление автопродлением.</p>
+          </article>
+          <article class="gcb-command">
+            <span>help</span>
+            <strong>/support</strong>
+            <p>Помощь по оплате, доступу в клубный канал, Zoom и проблемам в боте.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="gcb-panel">
+      <div class="gcb-section-head">
+        <div class="gcb-kicker">Быстрый маршрут</div>
+        <h2>Что делать после оплаты</h2>
+        <p class="gcb-section-intro">
+          Вся логика простая: бот открывает доступ, вы заходите в клубный канал, смотрите расписание,
+          записываетесь на встречу и получаете напоминания со ссылкой на созвон.
+        </p>
+      </div>
+
+      <div class="gcb-steps">
+        <article class="gcb-step">
+          <div class="gcb-step-num">1</div>
+          <strong>Зайдите в клубный канал</strong>
+          <p>Ссылка приходит после оплаты. Она одноразовая и действует 24 часа.</p>
+        </article>
+        <article class="gcb-step">
+          <div class="gcb-step-num">2</div>
+          <strong>Откройте расписание</strong>
+          <p>Используйте кнопку «Расписание» или команду <strong>/info</strong></p>
+        </article>
+        <article class="gcb-step">
+          <div class="gcb-step-num">3</div>
+          <strong>Выберите встречу</strong>
+          <p>В боте видно ближайшие даты, темы и уровень каждой встречи.</p>
+        </article>
+        <article class="gcb-step">
+          <div class="gcb-step-num">4</div>
+          <strong>Запишитесь</strong>
+          <p>Запись нужна, чтобы бот прислал напоминание и ссылку на созвон.</p>
+        </article>
+        <article class="gcb-step">
+          <div class="gcb-step-num">5</div>
+          <strong>Подключайтесь в Zoom</strong>
+          <p>Ссылка приходит через клубный канал и может дублироваться ботом перед началом.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="gcb-panel">
+      <div class="gcb-section-head">
+        <div class="gcb-kicker">Ключевые экраны</div>
+        <h2>Как это выглядит в боте</h2>
+        <p class="gcb-section-intro">
+          Здесь собраны реальные экраны из бота, чтобы сразу было понятно, куда нажимать внутри Telegram.
+        </p>
+      </div>
+
+      <div class="gcb-shots">
+        <article class="gcb-shot">
+          <img src="https://i.ibb.co/67x55h5n/image.jpg" alt="Кнопка меню внизу экрана" />
+          <div class="gcb-shot-copy">
+            <div class="gcb-shot-tag">Меню</div>
+            <strong>Если не видны кнопки</strong>
+            <p>Если снизу не видно кнопок, нажмите «Меню». Можно и просто ввести <strong>/</strong> в поле сообщения, чтобы открыть команды бота.</p>
+          </div>
+        </article>
+
+        <article class="gcb-shot">
+          <img src="https://i.ibb.co/tpSFD4rm/image.jpg" alt="Кнопки действий в боте" />
+          <div class="gcb-shot-copy">
+            <div class="gcb-shot-tag">Кнопки</div>
+            <strong>Выбор действий</strong>
+            <p>Внизу экрана есть кнопки для перехода в расписание, кабинет, поддержку, тарифы и GregoChat.</p>
+          </div>
+        </article>
+
+        <article class="gcb-shot">
+          <img src="https://i.ibb.co/Q3ZbVSYp/image.jpg" alt="Расписание встреч в боте" />
+          <div class="gcb-shot-copy">
+            <div class="gcb-shot-tag">Расписание</div>
+            <strong>Когда какие занятия</strong>
+            <p>После нажатия на кнопку «Расписание» открывается список ближайших встреч с темой, датой, временем и отметкой записи.</p>
+          </div>
+        </article>
+
+        <article class="gcb-shot">
+          <img src="https://i.ibb.co/p663htbG/image.jpg" alt="Запись на встречу через расписание" />
+          <div class="gcb-shot-copy">
+            <div class="gcb-shot-tag">Запись</div>
+            <strong>Запись через расписание</strong>
+            <p>Откройте нужную встречу и нажмите «Записаться». После этого бот пришлёт напоминание и ссылку на созвон.</p>
+          </div>
+        </article>
+
+        <article class="gcb-shot">
+          <img src="https://i.ibb.co/r2B3V7cT/image.jpg" alt="Экран GregoChat в боте" />
+          <div class="gcb-shot-copy">
+            <div class="gcb-shot-tag">GregoChat</div>
+            <strong>Как найти GregoChat</strong>
+            <p>Кнопка «Попробовать GregoChat» переводит в отдельного бота для ежедневной практики испанского.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="gcb-panel">
+      <div class="gcb-section-head">
+        <div class="gcb-kicker">Ориентиры</div>
+        <h2>Что важно помнить</h2>
+      </div>
+
+      <div class="gcb-info-grid">
+        <article class="gcb-info-card">
+          <strong>Где смотреть встречи</strong>
+          <p>Только внутри бота через кнопку «Расписание» или команду <strong>/info</strong></p>
+        </article>
+        <article class="gcb-info-card">
+          <strong>Какая таймзона</strong>
+          <p>Бот показывает расписание по Мадриду. Пересчитывайте время под свой город.</p>
+        </article>
+        <article class="gcb-info-card">
+          <strong>Где проходит встреча</strong>
+          <p>Созвоны проходят в Zoom. Ссылка лежит в клубном канале и может прийти за 5 минут до начала.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="gcb-panel">
+      <div class="gcb-section-head">
+        <div class="gcb-kicker">FAQ</div>
+        <h2>Частые вопросы по боту и встречам</h2>
+      </div>
+
+      <div class="gcb-faq-grid">
+        <div class="gcb-faq-col">
+          <details open>
+            <summary>Как посмотреть расписание?</summary>
+            <p>Используйте кнопку «Расписание» в меню или команду <strong>/info</strong>. Там видны ближайшие встречи, даты, темы и отметки записи.</p>
+          </details>
+
+          <details>
+            <summary>Когда какие встречи?</summary>
+            <p>Расписание динамическое. Точные даты и темы всегда смотрите внутри бота, а не по старым сообщениям в Telegram.</p>
+          </details>
+
+          <details>
+            <summary>В какой таймзоне показано время?</summary>
+            <p>Бот показывает время по Мадриду. Если вы в другой стране, заранее сверяйте разницу по своему часовому поясу.</p>
+          </details>
+
+          <details>
+            <summary>Где проходят встречи?</summary>
+            <p>Основные встречи клуба проходят в Zoom. Ссылка публикуется через клубный канал и может дублироваться перед началом.</p>
+          </details>
+
+          <details>
+            <summary>Как записаться на встречу?</summary>
+            <p>Откройте <strong>/info</strong>, выберите встречу и нажмите кнопку записи. После этого бот начинает присылать напоминания.</p>
+          </details>
+
+          <details>
+            <summary>Когда придёт Zoom-ссылка?</summary>
+            <p>Обычно ссылка появляется в клубном канале ближе к старту. Если она добавлена заранее, бот может продублировать её примерно за 5 минут до начала.</p>
+          </details>
+
+          <details>
+            <summary>Я не могу найти Zoom-ссылку</summary>
+            <p>Сначала проверьте клубный канал и личные напоминания от бота. Если ссылки нет прямо перед стартом, напишите в поддержку.</p>
+          </details>
+
+          <details>
+            <summary>Нужно ли ждать набора группы или понедельника?</summary>
+            <p>Нет. Доступ открывается сразу после оплаты. Можно сразу зайти в клубный канал и записаться на ближайшую встречу.</p>
+          </details>
+        </div>
+
+        <div class="gcb-faq-col">
+          <details>
+            <summary>Что делать, если ссылка в клубный канал не пришла?</summary>
+            <p>Откройте <strong>/support</strong> или напишите <a href="https://t.me/ultimagrego_bot" target="_blank" rel="noreferrer">@ultimagrego_bot</a>. Поддержка проверит доступ и поможет восстановить вход.</p>
+          </details>
+
+          <details>
+            <summary>Что делать, если ссылка истекла?</summary>
+            <p>Ссылка в клубный канал одноразовая и действует 24 часа. Если вы не успели зайти вовремя, запросите новую у поддержки.</p>
+          </details>
+
+          <details>
+            <summary>Проблема в боте. Куда писать?</summary>
+            <p>По оплате, доступу, расписанию и Zoom пишите <a href="https://t.me/ultimagrego_bot" target="_blank" rel="noreferrer">@ultimagrego_bot</a>. Если проблема именно техническая, можно писать и на <a href="https://t.me/zhmaq" target="_blank" rel="noreferrer">@zhmaq</a>.</p>
+          </details>
+
+          <details>
+            <summary>Как связаться с кураторами?</summary>
+            <p>Базовая точка входа та же: <a href="https://t.me/ultimagrego_bot" target="_blank" rel="noreferrer">@ultimagrego_bot</a>. Менеджер перенаправит вопрос нужному человеку.</p>
+          </details>
+
+          <details>
+            <summary>Как отменить подписку?</summary>
+            <p>Откройте <strong>/status</strong>. Через этот раздел можно перейти в управление подпиской и отключить автопродление.</p>
+          </details>
+
+          <details>
+            <summary>Что будет, если не прошло автосписание?</summary>
+            <p>Доступ может временно остановиться, а бот пришлёт сообщение об ошибке оплаты. После этого обновите способ оплаты через <strong>/status</strong> или продлите доступ заново.</p>
+          </details>
+
+          <details>
+            <summary>Что ещё даёт разговорный клуб?</summary>
+            <p>Кроме встреч, подписка даёт доступ к <a href="https://t.me/GregoChat_bot" target="_blank" rel="noreferrer">@GregoChat_bot</a>, базе фраз, закрытым встречам и клубному комьюнити.</p>
+          </details>
+
+          <details>
+            <summary>Как добавить встречу в Google Calendar?</summary>
+            <p>После записи бот может предложить кнопку добавления события в Google Calendar. Если видите её, лучше сохранить встречу сразу.</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <section class="gcb-panel">
+      <div class="gcb-section-head">
+        <div class="gcb-kicker">Поддержка</div>
+        <h2>Куда писать в разных ситуациях</h2>
+      </div>
+
+      <div class="gcb-support-grid">
+        <article class="gcb-support">
+          <strong>Не пришла ссылка или истёк доступ</strong>
+          <p>Вопросы по входу в клубный канал, оплате и восстановлению доступа.</p>
+          <p><a href="https://t.me/ultimagrego_bot" target="_blank" rel="noreferrer">@ultimagrego_bot</a></p>
+        </article>
+        <article class="gcb-support">
+          <strong>Проблема со встречей или Zoom</strong>
+          <p>Если встреча уже близко, а вы не нашли ссылку или не понимаете, как зайти.</p>
+          <p><a href="https://t.me/ultimagrego_bot" target="_blank" rel="noreferrer">@ultimagrego_bot</a></p>
+        </article>
+        <article class="gcb-support">
+          <strong>Технический сбой</strong>
+          <p>Если бот ведёт себя странно, кнопки не работают или есть явная техническая ошибка.</p>
+          <p><a href="https://t.me/zhmaq" target="_blank" rel="noreferrer">@zhmaq</a></p>
+        </article>
+      </div>
+    </section>
+  </div>
+</div>

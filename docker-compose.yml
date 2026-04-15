@@ -1,0 +1,66 @@
+# Docker Compose для Subscription Bot
+# Запуск: docker-compose up -d
+
+services:
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: subscription-bot
+    restart: unless-stopped
+    
+    # Переменные окружения (из .env файла)
+    env_file:
+      - .env
+
+    environment:
+      GOOGLE_CREDS_FILE: /app/secrets/google_sheet_creds.json
+    
+    # Порт для FastAPI (Stripe webhooks) - только локально для healthcheck
+    ports:
+      - "127.0.0.1:${HOST_WEB_PORT:-8080}:8000"
+    
+    # Volumes для персистентных данных
+    volumes:
+      # SQLite база данных
+      - ./data:/app/data
+      # Google Service Account (если используется)
+      - ./secrets:/app/secrets:ro
+    
+    # Healthcheck
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    
+    # Логирование
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ==========================================================================
+  # Cloudflare Tunnel - проброс трафика с club.hablacongrego.com на bot:8000
+  # Туннель: grego-club (0dd5f6d5-1381-417e-8be9-474a0a0d6e61)
+  # ==========================================================================
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared-tunnel
+    command: tunnel --no-autoupdate run --token eyJhIjoiYTA4MzAyOGQ1ZWE3NTgwZGY0YmEyYmE1ZGVhM2U0OTYiLCJ0IjoiMGRkNWY2ZDUtMTM4MS00MTdlLThiZTktNDc0YTBhMGQ2ZTYxIiwicyI6Ik5UZzBOMlJpWXpRdE1tSTBZaTAwT1RBMkxXRmpNak10WVRjd09HUTFNV1E0WXpVeCJ9
+    depends_on:
+      bot:
+        condition: service_healthy
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "5m"
+        max-file: "2"
+
+# Сеть для связи между контейнерами
+networks:
+  default:
+    name: subscription-bot-network

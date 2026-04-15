@@ -1,0 +1,564 @@
+<style>
+  #grego-legal-tilda,
+  #grego-legal-tilda * {
+    box-sizing: border-box !important;
+  }
+
+  #grego-legal-tilda {
+    width: 100% !important;
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif !important;
+    color: #444c59 !important;
+    background:
+      radial-gradient(circle at top right, rgba(52, 87, 188, 0.12), transparent 26%),
+      radial-gradient(circle at left top, rgba(52, 87, 188, 0.08), transparent 22%),
+      linear-gradient(180deg, #f7f9fe 0%, #eff4ff 100%) !important;
+    padding: 32px 0 !important;
+  }
+
+  #grego-legal-tilda a {
+    color: #3457bc !important;
+    text-decoration: none !important;
+  }
+
+  #grego-legal-tilda a:hover {
+    text-decoration: underline !important;
+  }
+
+  #grego-legal-tilda .gl-wrap {
+    max-width: 1100px !important;
+    margin: 0 auto !important;
+    padding: 0 20px !important;
+  }
+
+  #grego-legal-tilda .gl-hero,
+  #grego-legal-tilda .gl-card,
+  #grego-legal-tilda .gl-price {
+    background: #ffffff !important;
+    border: 1px solid rgba(52, 87, 188, 0.12) !important;
+    border-radius: 24px !important;
+    box-shadow: 0 18px 40px rgba(43, 61, 115, 0.07) !important;
+  }
+
+  #grego-legal-tilda .gl-hero {
+    padding: 32px !important;
+    margin-bottom: 20px !important;
+  }
+
+  #grego-legal-tilda .gl-badge {
+    display: inline-block !important;
+    padding: 8px 14px !important;
+    border-radius: 999px !important;
+    background: rgba(52, 87, 188, 0.1) !important;
+    color: #3457bc !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.05em !important;
+    text-transform: uppercase !important;
+  }
+
+  #grego-legal-tilda h1,
+  #grego-legal-tilda h2,
+  #grego-legal-tilda h3,
+  #grego-legal-tilda h4,
+  #grego-legal-tilda p,
+  #grego-legal-tilda li,
+  #grego-legal-tilda div,
+  #grego-legal-tilda span {
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif !important;
+  }
+
+  #grego-legal-tilda h1 {
+    margin: 16px 0 10px !important;
+    font-size: clamp(30px, 5vw, 52px) !important;
+    line-height: 1.06 !important;
+    color: #222a37 !important;
+    font-weight: 800 !important;
+  }
+
+  #grego-legal-tilda h2 {
+    margin: 0 0 14px !important;
+    font-size: 25px !important;
+    line-height: 1.2 !important;
+    color: #222a37 !important;
+    font-weight: 700 !important;
+  }
+
+  #grego-legal-tilda h3 {
+    margin: 22px 0 10px !important;
+    font-size: 18px !important;
+    line-height: 1.35 !important;
+    color: #273042 !important;
+    font-weight: 700 !important;
+  }
+
+  #grego-legal-tilda p,
+  #grego-legal-tilda li {
+    margin: 0 0 10px !important;
+    font-size: 16px !important;
+    line-height: 1.7 !important;
+    color: #444c59 !important;
+  }
+
+  #grego-legal-tilda ul {
+    margin: 0 !important;
+    padding-left: 20px !important;
+  }
+
+  #grego-legal-tilda .gl-actions {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+    margin-top: 22px !important;
+  }
+
+  #grego-legal-tilda .gl-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 12px 18px !important;
+    border-radius: 14px !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+  }
+
+  #grego-legal-tilda .gl-btn-primary {
+    background: #3457bc !important;
+    color: #ffffff !important;
+    box-shadow: 0 14px 28px rgba(52, 87, 188, 0.2) !important;
+  }
+
+  #grego-legal-tilda .gl-btn-secondary {
+    background: #ffffff !important;
+    color: #3457bc !important;
+    border: 1px solid rgba(52, 87, 188, 0.18) !important;
+  }
+
+  #grego-legal-tilda .gl-grid-4,
+  #grego-legal-tilda .gl-grid-2,
+  #grego-legal-tilda .gl-grid-3 {
+    display: grid !important;
+    gap: 16px !important;
+  }
+
+  #grego-legal-tilda .gl-grid-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    margin-bottom: 20px !important;
+  }
+
+  #grego-legal-tilda .gl-grid-2 {
+    grid-template-columns: 1.08fr 0.92fr !important;
+    margin-bottom: 20px !important;
+  }
+
+  #grego-legal-tilda .gl-grid-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    margin-bottom: 20px !important;
+  }
+
+  #grego-legal-tilda .gl-card {
+    padding: 24px !important;
+  }
+
+  #grego-legal-tilda .gl-meta {
+    font-size: 12px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.05em !important;
+    color: #778193 !important;
+    margin-bottom: 8px !important;
+    font-weight: 700 !important;
+  }
+
+  #grego-legal-tilda .gl-big {
+    font-size: 20px !important;
+    line-height: 1.45 !important;
+    color: #242d3b !important;
+    font-weight: 700 !important;
+  }
+
+  #grego-legal-tilda .gl-note {
+    font-size: 14px !important;
+    color: #697384 !important;
+    margin-top: 12px !important;
+  }
+
+  #grego-legal-tilda .gl-price {
+    padding: 22px !important;
+  }
+
+  #grego-legal-tilda .gl-price strong {
+    display: block !important;
+    margin-bottom: 6px !important;
+    font-size: 20px !important;
+    color: #222a37 !important;
+  }
+
+  #grego-legal-tilda .gl-doc {
+    position: relative !important;
+    padding: 26px !important;
+    overflow: hidden !important;
+    margin-bottom: 20px !important;
+  }
+
+  #grego-legal-tilda .gl-doc::before {
+    content: "" !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 4px !important;
+    background: linear-gradient(90deg, #3457bc 0%, rgba(52, 87, 188, 0.25) 100%) !important;
+  }
+
+  #grego-legal-tilda .gl-tags {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+    margin-bottom: 14px !important;
+  }
+
+  #grego-legal-tilda .gl-tag {
+    display: inline-block !important;
+    padding: 7px 12px !important;
+    border-radius: 999px !important;
+    background: rgba(52, 87, 188, 0.08) !important;
+    color: #3457bc !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+  }
+
+  #grego-legal-tilda .gl-footer {
+    font-size: 14px !important;
+    color: #6e7889 !important;
+    padding: 8px 2px 0 !important;
+  }
+
+  @media (max-width: 980px) {
+    #grego-legal-tilda .gl-grid-4,
+    #grego-legal-tilda .gl-grid-2,
+    #grego-legal-tilda .gl-grid-3 {
+      grid-template-columns: 1fr 1fr !important;
+    }
+  }
+
+  @media (max-width: 720px) {
+    #grego-legal-tilda {
+      padding: 20px 0 !important;
+    }
+
+    #grego-legal-tilda .gl-wrap {
+      padding: 0 14px !important;
+    }
+
+    #grego-legal-tilda .gl-grid-4,
+    #grego-legal-tilda .gl-grid-2,
+    #grego-legal-tilda .gl-grid-3 {
+      grid-template-columns: 1fr !important;
+    }
+
+    #grego-legal-tilda .gl-hero,
+    #grego-legal-tilda .gl-card,
+    #grego-legal-tilda .gl-doc,
+    #grego-legal-tilda .gl-price {
+      padding: 20px !important;
+    }
+
+    #grego-legal-tilda h1 {
+      font-size: 34px !important;
+    }
+
+    #grego-legal-tilda p,
+    #grego-legal-tilda li {
+      font-size: 15px !important;
+    }
+  }
+</style>
+
+<div id="grego-legal-tilda">
+  <div class="gl-wrap">
+    <section class="gl-hero">
+      <div class="gl-badge">Grego Club · Legal</div>
+      <h1>Documentos legales para Grego Club</h1>
+      <p>Oferta pública bilingüe para insertar directamente en un bloque HTML de Tilda. Todo está dentro de este mismo archivo: contenido, diseño y estilos.</p>
+      <div class="gl-actions">
+        <a class="gl-btn gl-btn-primary" href="#grego-es">Versión en español</a>
+        <a class="gl-btn gl-btn-secondary" href="#grego-ru">Русская версия</a>
+        <a class="gl-btn gl-btn-secondary" href="https://telegram.org/privacy" target="_blank" rel="noreferrer">Telegram Privacy</a>
+      </div>
+    </section>
+
+    <section class="gl-grid-4">
+      <div class="gl-card">
+        <div class="gl-meta">Titular</div>
+        <div class="gl-big">Hablacongrego SL</div>
+      </div>
+      <div class="gl-card">
+        <div class="gl-meta">Email</div>
+        <div class="gl-big">hablacongrego@gmail.com</div>
+      </div>
+      <div class="gl-card">
+        <div class="gl-meta">Teléfono</div>
+        <div class="gl-big">+34 626 92 95 92</div>
+      </div>
+      <div class="gl-card">
+        <div class="gl-meta">NIF / VAT</div>
+        <div class="gl-big">ESB75382036</div>
+      </div>
+    </section>
+
+    <section class="gl-grid-2">
+      <div class="gl-card">
+        <h2>Datos principales</h2>
+        <ul>
+          <li><strong>Proyecto:</strong> Grego Club</li>
+          <li><strong>Plataforma:</strong> Telegram <a href="https://t.me/gregoclub_bot" target="_blank" rel="noreferrer">@gregoclub_bot</a></li>
+          <li><strong>Dominio técnico:</strong> <a href="https://club.hablacongrego.com" target="_blank" rel="noreferrer">club.hablacongrego.com</a></li>
+          <li><strong>Soporte:</strong> <a href="https://t.me/ultimagrego_bot" target="_blank" rel="noreferrer">@ultimagrego_bot</a></li>
+          <li><strong>Soporte técnico:</strong> <a href="https://t.me/zhmaq" target="_blank" rel="noreferrer">@zhmaq</a></li>
+          <li><strong>Domicilio indicado:</strong> Blanes, Girona, 17300, España</li>
+        </ul>
+        <div class="gl-note">Si полный юридический адрес отличается, просто замени этот пункт здесь же в этом файле.</div>
+      </div>
+      <div class="gl-card">
+        <h2>Qué incluye la suscripción</h2>
+        <ul>
+          <li>Canal privado en Telegram</li>
+          <li>Hasta 4 sesiones semanales de práctica de español</li>
+          <li>Acceso a GregoChat o bot de práctica con IA</li>
+          <li>Base de conocimiento, frases preparadas y materiales</li>
+          <li>Grabaciones disponibles y encuentros cerrados</li>
+          <li>Invitaciones y recordatorios a eventos del club</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="gl-grid-3">
+      <div class="gl-price">
+        <strong>1 mes</strong>
+        <p>49 EUR</p>
+        <p>Acceso inicial por 1 mes desde la activación.</p>
+      </div>
+      <div class="gl-price">
+        <strong>3 meses</strong>
+        <p>132 EUR</p>
+        <p>Acceso inicial por 3 meses desde la activación.</p>
+      </div>
+      <div class="gl-price">
+        <strong>6 meses</strong>
+        <p>235 EUR</p>
+        <p>Acceso inicial por 6 meses desde la activación.</p>
+      </div>
+    </section>
+
+    <section id="grego-es" class="gl-card gl-doc">
+      <div class="gl-tags">
+        <span class="gl-tag">ES</span>
+        <span class="gl-tag">Oferta</span>
+        <span class="gl-tag">Actualizado: 2026-03-07</span>
+      </div>
+      <h2>Condiciones generales de contratación</h2>
+      <p><strong>Plataforma:</strong> Telegram (<a href="https://t.me/gregoclub_bot" target="_blank" rel="noreferrer">@gregoclub_bot</a>)</p>
+      <p><strong>Proyecto:</strong> Grego Club</p>
+
+      <h3>1. Identificación del Prestador</h3>
+      <ul>
+        <li><strong>Nombre / razón social:</strong> Hablacongrego SL</li>
+        <li><strong>NIF / VAT:</strong> ESB75382036</li>
+        <li><strong>Domicilio profesional indicado:</strong> Blanes, Girona, 17300, España</li>
+        <li><strong>Email legal y de reclamaciones:</strong> <a href="mailto:hablacongrego@gmail.com">hablacongrego@gmail.com</a></li>
+        <li><strong>Teléfono:</strong> <a href="tel:+34626929592">+34 626 92 95 92</a></li>
+        <li><strong>Soporte operativo:</strong> <a href="https://t.me/ultimagrego_bot" target="_blank" rel="noreferrer">@ultimagrego_bot</a></li>
+        <li><strong>Soporte técnico:</strong> <a href="https://t.me/zhmaq" target="_blank" rel="noreferrer">@zhmaq</a></li>
+      </ul>
+
+      <h3>2. Objeto del contrato</h3>
+      <p>Las presentes condiciones regulan la contratación a distancia de la suscripción digital Grego Club, ofrecida y gestionada a través de Telegram. La contratación permite al Usuario acceder, durante el período abonado, al ecosistema digital del proyecto en los términos vigentes en la plataforma.</p>
+
+      <h3>3. Descripción del servicio</h3>
+      <ul>
+        <li>acceso a un canal privado en Telegram;</li>
+        <li>hasta 4 sesiones semanales de práctica de español con hablantes nativos o profesores;</li>
+        <li>acceso a GregoChat o bot de práctica con IA;</li>
+        <li>acceso a base de conocimiento, frases preparadas, materiales y checklists;</li>
+        <li>acceso a grabaciones disponibles de sesiones o directos;</li>
+        <li>invitaciones y recordatorios para eventos o encuentros del club;</li>
+        <li>acceso a encuentros cerrados o actividades adicionales cuando estén incluidos en la programación.</li>
+      </ul>
+
+      <h3>4. Tarifas y precio</h3>
+      <ul>
+        <li><strong>1 mes:</strong> 49 EUR</li>
+        <li><strong>3 meses:</strong> 132 EUR</li>
+        <li><strong>6 meses:</strong> 235 EUR</li>
+      </ul>
+
+      <h3>5. Procedimiento de contratación</h3>
+      <ul>
+        <li>el Usuario entra en el bot de Telegram;</li>
+        <li>el Usuario elige una tarifa;</li>
+        <li>el sistema redirige al Usuario a la pasarela de pago correspondiente;</li>
+        <li>una vez confirmado el pago, el Prestador activa el acceso a la suscripción.</li>
+      </ul>
+
+      <h3>6. Forma de pago y renovación</h3>
+      <p>La lógica principal del proyecto prevé pago por suscripción recurrente, con cobro periódico mediante la pasarela integrada. Salvo indicación distinta antes del pago, la suscripción se renueva automáticamente. El Usuario puede gestionarla o cancelarla mediante el flujo de <strong>/status</strong> o por la herramienta de la pasarela. La cancelación evita cobros futuros, pero no anula el período ya pagado.</p>
+
+      <h3>7. Inicio, duración y acceso</h3>
+      <p>El acceso se activa tras la confirmación del pago. La duración inicial depende de la tarifa elegida: 1 mes, 3 meses o 6 meses. El acceso es personal, limitado, revocable y no transferible.</p>
+
+      <h3>8. Derecho de desistimiento</h3>
+      <p>Si el Usuario tiene la condición legal de consumidor, podrá disponer del derecho de desistimiento en el plazo de 14 días naturales desde la celebración del contrato, salvo en los supuestos de excepción legal. Dado que el servicio puede incluir acceso inmediato a contenido digital y activación inmediata de servicios online, el Usuario acepta expresamente que el suministro y la ejecución pueden comenzar antes de que expire dicho plazo.</p>
+
+      <h3>9. Política de cancelación y reembolsos</h3>
+      <ul>
+        <li>La cancelación de la renovación automática opera hacia el futuro.</li>
+        <li>Los importes ya cobrados por períodos iniciados no se reembolsan, salvo obligación legal, error de cobro o decisión expresa del Prestador.</li>
+        <li>En caso de impago, devolución bancaria, chargeback o cancelación efectiva de la suscripción, el acceso podrá suspenderse o terminar.</li>
+      </ul>
+
+      <h3>10. Obligaciones del Usuario</h3>
+      <ul>
+        <li>facilitar datos veraces y actualizados;</li>
+        <li>utilizar el servicio de forma personal y conforme a la ley;</li>
+        <li>respetar las normas básicas de convivencia en la comunidad;</li>
+        <li>no publicar spam ni contenidos ilícitos u ofensivos;</li>
+        <li>no compartir materiales, enlaces de acceso o recursos internos sin autorización.</li>
+      </ul>
+
+      <h3>11. Facultades del Prestador</h3>
+      <p>El Prestador podrá limitar, suspender o cancelar el acceso del Usuario en caso de impago, uso abusivo del servicio, cesión no autorizada del acceso, incumplimiento grave o conductas que perjudiquen a la comunidad.</p>
+
+      <h3>12. Responsabilidad</h3>
+      <p>El Prestador asume una obligación de medios y no garantiza un resultado lingüístico, académico, profesional o personal concreto. No será responsable por interrupciones o limitaciones imputables a Telegram, Stripe u otros terceros ni por incidencias técnicas ajenas a su control razonable.</p>
+
+      <h3>13. Atención al cliente y reclamaciones</h3>
+      <ul>
+        <li>Soporte operativo: <a href="https://t.me/ultimagrego_bot" target="_blank" rel="noreferrer">@ultimagrego_bot</a></li>
+        <li>Soporte técnico: <a href="https://t.me/zhmaq" target="_blank" rel="noreferrer">@zhmaq</a></li>
+        <li>Email legal de reclamaciones: <a href="mailto:hablacongrego@gmail.com">hablacongrego@gmail.com</a></li>
+      </ul>
+
+      <h3>14. Protección de datos</h3>
+      <p>El uso de la plataforma Telegram queda además sujeto a la política de privacidad publicada por Telegram: <a href="https://telegram.org/privacy" target="_blank" rel="noreferrer">https://telegram.org/privacy</a></p>
+      <p>Si el Prestador realiza tratamientos propios adicionales de datos personales fuera de la operativa estándar de Telegram y de la pasarela de pago, deberá publicar además su propia política de privacidad antes de la contratación.</p>
+
+      <h3>15. Modificación de las condiciones</h3>
+      <p>El Prestador podrá actualizar estas condiciones por motivos legales, técnicos, operativos o comerciales.</p>
+
+      <h3>16. Ley aplicable y jurisdicción</h3>
+      <p>Estas condiciones se rigen por la legislación española.</p>
+
+      <h3>17. Base normativa de referencia</h3>
+      <ul>
+        <li>Ley 34/2002, de servicios de la sociedad de la información y de comercio electrónico.</li>
+        <li>Real Decreto Legislativo 1/2007, texto refundido de la Ley General para la Defensa de los Consumidores y Usuarios.</li>
+      </ul>
+    </section>
+
+    <section id="grego-ru" class="gl-card gl-doc">
+      <div class="gl-tags">
+        <span class="gl-tag">RU</span>
+        <span class="gl-tag">Оферта</span>
+        <span class="gl-tag">Обновлено: 2026-03-07</span>
+      </div>
+      <h2>Публичная оферта</h2>
+      <p><strong>Платформа:</strong> Telegram (<a href="https://t.me/gregoclub_bot" target="_blank" rel="noreferrer">@gregoclub_bot</a>)</p>
+      <p><strong>Проект:</strong> Grego Club</p>
+
+      <h3>1. Данные Исполнителя</h3>
+      <ul>
+        <li><strong>Наименование:</strong> Hablacongrego SL</li>
+        <li><strong>NIF / VAT:</strong> ESB75382036</li>
+        <li><strong>Указанный профессиональный адрес:</strong> Blanes, Girona, 17300, España</li>
+        <li><strong>Email для юридических уведомлений и претензий:</strong> <a href="mailto:hablacongrego@gmail.com">hablacongrego@gmail.com</a></li>
+        <li><strong>Телефон:</strong> <a href="tel:+34626929592">+34 626 92 95 92</a></li>
+        <li><strong>Операционная поддержка:</strong> <a href="https://t.me/ultimagrego_bot" target="_blank" rel="noreferrer">@ultimagrego_bot</a></li>
+        <li><strong>Техническая поддержка:</strong> <a href="https://t.me/zhmaq" target="_blank" rel="noreferrer">@zhmaq</a></li>
+      </ul>
+
+      <h3>2. Предмет договора</h3>
+      <p>Настоящие условия регулируют дистанционное заключение договора на цифровую подписку Grego Club, предлагаемую и администрируемую через Telegram. Пользователь получает доступ к цифровой экосистеме проекта на оплаченный срок на условиях, действующих на платформе.</p>
+
+      <h3>3. Описание услуги</h3>
+      <ul>
+        <li>доступ в закрытый Telegram-канал;</li>
+        <li>до 4 еженедельных онлайн-встреч для разговорной практики испанского;</li>
+        <li>доступ к GregoChat или AI-боту для практики;</li>
+        <li>доступ к базе знаний, готовым фразам, материалам и чек-листам;</li>
+        <li>доступ к записям эфиров или сессий;</li>
+        <li>приглашения и напоминания о встречах и событиях клуба;</li>
+        <li>доступ к закрытым встречам и дополнительным активностям.</li>
+      </ul>
+
+      <h3>4. Тарифы и цена</h3>
+      <ul>
+        <li><strong>1 месяц:</strong> 49 EUR</li>
+        <li><strong>3 месяца:</strong> 132 EUR</li>
+        <li><strong>6 месяцев:</strong> 235 EUR</li>
+      </ul>
+
+      <h3>5. Порядок заключения договора</h3>
+      <ul>
+        <li>Пользователь заходит в Telegram-бот;</li>
+        <li>Пользователь выбирает тариф;</li>
+        <li>система перенаправляет Пользователя в платежную форму;</li>
+        <li>после подтверждения оплаты Исполнитель активирует доступ.</li>
+      </ul>
+
+      <h3>6. Оплата и продление</h3>
+      <p>Основная логика проекта предусматривает оплату в формате рекуррентной подписки с периодическим списанием через интегрированную платежную систему. Если до оплаты не указано иное, подписка продлевается автоматически. Пользователь может отменить автопродление через сценарий <strong>/status</strong> или через инструмент платежного провайдера. Отмена автопродления прекращает будущие списания, но не аннулирует уже оплаченный период.</p>
+
+      <h3>7. Начало оказания услуги, срок и доступ</h3>
+      <p>Доступ активируется после подтверждения оплаты. Первоначальный срок зависит от выбранного тарифа: 1 месяц, 3 месяца или 6 месяцев. Доступ является личным, ограниченным и непередаваемым.</p>
+
+      <h3>8. Право на отказ от договора</h3>
+      <p>Если Пользователь является потребителем по закону, он вправе воспользоваться правом на отказ от дистанционного договора в течение 14 календарных дней, если только не применяется установленное законом исключение. Поскольку услуга может включать немедленный доступ к цифровому контенту и немедленную активацию онлайн-сервисов, Пользователь соглашается, что оказание услуги может начаться до истечения этого срока.</p>
+
+      <h3>9. Отмена подписки и возвраты</h3>
+      <ul>
+        <li>Отмена автопродления действует на будущее.</li>
+        <li>Денежные средства за уже начавшийся период не возвращаются, кроме случаев обязательного возврата по закону, ошибочного списания или отдельного решения Исполнителя.</li>
+        <li>При неоплате, возврате платежа или chargeback доступ может быть ограничен или прекращен.</li>
+      </ul>
+
+      <h3>10. Обязанности Пользователя</h3>
+      <ul>
+        <li>предоставлять достоверные и актуальные данные;</li>
+        <li>использовать сервис лично и законно;</li>
+        <li>соблюдать базовые правила общения в сообществе;</li>
+        <li>не размещать спам, незаконный, оскорбительный или нецелевой контент;</li>
+        <li>не передавать третьим лицам материалы и внутренние ресурсы без разрешения.</li>
+      </ul>
+
+      <h3>11. Права Исполнителя</h3>
+      <p>Исполнитель вправе ограничить, приостановить или прекратить доступ Пользователя в случае неоплаты, злоупотребления сервисом, несанкционированной передачи доступа или существенного нарушения условий.</p>
+
+      <h3>12. Ответственность</h3>
+      <p>Исполнитель добросовестно организует сервис, но не гарантирует конкретный языковой, академический, профессиональный или личный результат. Исполнитель не несет ответственности за сбои на стороне Telegram, Stripe и иных третьих лиц.</p>
+
+      <h3>13. Поддержка и претензии</h3>
+      <ul>
+        <li>Операционная поддержка: <a href="https://t.me/ultimagrego_bot" target="_blank" rel="noreferrer">@ultimagrego_bot</a></li>
+        <li>Техническая поддержка: <a href="https://t.me/zhmaq" target="_blank" rel="noreferrer">@zhmaq</a></li>
+        <li>Юридический email для претензий: <a href="mailto:hablacongrego@gmail.com">hablacongrego@gmail.com</a></li>
+      </ul>
+
+      <h3>14. Персональные данные</h3>
+      <p>Использование платформы Telegram также регулируется опубликованной Telegram политикой конфиденциальности: <a href="https://telegram.org/privacy" target="_blank" rel="noreferrer">https://telegram.org/privacy</a></p>
+      <p>Если Исполнитель отдельно осуществляет собственную обработку персональных данных вне стандартной работы Telegram и платежной системы, он обязан дополнительно опубликовать собственную политику конфиденциальности.</p>
+
+      <h3>15. Изменение условий</h3>
+      <p>Исполнитель вправе изменять настоящие условия по юридическим, техническим, операционным или коммерческим причинам.</p>
+
+      <h3>16. Применимое право и юрисдикция</h3>
+      <p>К настоящим условиям применяется законодательство Испании.</p>
+
+      <h3>17. Нормативная база</h3>
+      <ul>
+        <li>Ley 34/2002, de servicios de la sociedad de la información y de comercio electrónico.</li>
+        <li>Real Decreto Legislativo 1/2007 — в части дистанционных договоров и права потребителя на отказ.</li>
+      </ul>
+    </section>
+
+    <div class="gl-footer">Grego Club · Hablacongrego SL · Один файл для вставки в HTML-блок Tilda.</div>
+  </div>
+</div>

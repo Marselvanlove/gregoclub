@@ -1,0 +1,11 @@
+# Cloudflare Tunnel Configuration Example
+# Replace values below with your own tunnel ID and public hostname.
+
+tunnel: your-tunnel-id
+credentials-file: /etc/cloudflared/credentials.json
+no-autoupdate: true
+
+ingress:
+  - hostname: your-bot-domain.example.com
+    service: http://bot:8000
+  - service: http_status:404

@@ -1,0 +1,12 @@
+{
+  "name": "gregoclub-monorepo",
+  "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "dashboard:dev": "npm --workspace apps/dashboard run dev",
+    "dashboard:build": "npm --workspace apps/dashboard run build",
+    "dashboard:start": "npm --workspace apps/dashboard run start"
+  }
+}

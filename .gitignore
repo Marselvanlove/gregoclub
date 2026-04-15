@@ -1,0 +1,53 @@
+# Байткод Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Виртуальное окружение
+.venv/
+venv/
+
+# Переменные окружения (секреты!)
+.env
+.env.*
+!.env.example
+
+# База данных
+data/*.db
+*.db
+*.sqlite
+*.sqlite3
+
+# Google credentials (секреты!)
+google_sheet_creds.json
+secrets/
+
+# Cloudflare / tunnels
+cloudflared/config.yml
+cloudflared/credentials.json
+
+# Node / Next.js
+node_modules/
+.next/
+apps/*/node_modules/
+apps/*/.next/
+apps/*/dist/
+
+# IDE
+.idea/
+.vscode/
+.windsurf/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+
+# Логи
+*.log
+
+# Локальные артефакты и экспорты
+coverage/
+dist/
+tmp/
+*.local

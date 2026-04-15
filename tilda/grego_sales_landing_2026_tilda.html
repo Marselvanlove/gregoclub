@@ -1,0 +1,1170 @@
+<style>
+  @import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap");
+
+  #grego-sales-2026,
+  #grego-sales-2026 * {
+    box-sizing: border-box !important;
+  }
+
+  #grego-sales-2026 {
+    --gs-bg: #e8f7d4 !important;
+    --gs-surface: rgba(255, 255, 255, 0.90) !important;
+    --gs-surface-strong: rgba(255, 255, 255, 0.98) !important;
+    --gs-ink: #263313 !important;
+    --gs-text: #4d6330 !important;
+    --gs-muted: #819c64 !important;
+    --gs-line: rgba(88, 167, 0, 0.18) !important;
+    --gs-blue: #58cc02 !important;
+    --gs-blue-dark: #58a700 !important;
+    --gs-blue-soft: rgba(88, 204, 2, 0.12) !important;
+    --gs-shadow: 0 16px 0 rgba(88, 167, 0, 0.16), 0 28px 48px rgba(71, 122, 24, 0.15) !important;
+    --gs-radius-xl: 32px !important;
+    --gs-radius-lg: 24px !important;
+    --gs-radius-md: 18px !important;
+    width: 100% !important;
+    overflow: hidden !important;
+    position: relative !important;
+    padding: 0 0 110px !important;
+    color: var(--gs-text) !important;
+    font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+    background:
+      radial-gradient(circle at 15% 10%, rgba(255, 214, 10, 0.28), transparent 22%),
+      radial-gradient(circle at 85% 8%, rgba(88, 204, 2, 0.20), transparent 20%),
+      linear-gradient(180deg, #f7ffe7 0%, #ebf9da 46%, #f7ffe7 100%) !important;
+  }
+
+  #grego-sales-2026 a {
+    color: inherit !important;
+    text-decoration: none !important;
+  }
+
+  #grego-sales-2026 .gs-wrap {
+    width: min(1160px, calc(100% - 28px)) !important;
+    margin: 0 auto !important;
+  }
+
+  #grego-sales-2026 .gs-section {
+    padding: 16px 0 !important;
+  }
+
+  #grego-sales-2026 .gs-shell {
+    position: relative !important;
+    border: 2px solid var(--gs-line) !important;
+    border-radius: var(--gs-radius-xl) !important;
+    background: var(--gs-surface) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    box-shadow: var(--gs-shadow) !important;
+    overflow: hidden !important;
+  }
+
+  #grego-sales-2026 .gs-shell::before {
+    content: "" !important;
+    position: absolute !important;
+    inset: 0 !important;
+    background:
+      linear-gradient(140deg, rgba(255, 255, 255, 0.52), transparent 42%),
+      radial-gradient(circle at top right, rgba(88, 204, 2, 0.14), transparent 32%) !important;
+    pointer-events: none !important;
+  }
+
+  #grego-sales-2026 .gs-inner {
+    position: relative !important;
+    z-index: 1 !important;
+    padding: 24px !important;
+  }
+
+  #grego-sales-2026 .gs-kicker {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    min-height: 34px !important;
+    padding: 8px 14px !important;
+    border-radius: 999px !important;
+    background: rgba(255, 255, 255, 0.98) !important;
+    border: 2px solid rgba(88, 167, 0, 0.16) !important;
+    color: var(--gs-blue) !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+  }
+
+  #grego-sales-2026 h1,
+  #grego-sales-2026 h2,
+  #grego-sales-2026 h3,
+  #grego-sales-2026 p,
+  #grego-sales-2026 li,
+  #grego-sales-2026 span,
+  #grego-sales-2026 button {
+    font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  }
+
+  #grego-sales-2026 h1,
+  #grego-sales-2026 h2,
+  #grego-sales-2026 h3 {
+    margin: 0 !important;
+    color: var(--gs-ink) !important;
+  }
+
+  #grego-sales-2026 h1 {
+    margin-top: 16px !important;
+    font-size: clamp(34px, 10vw, 74px) !important;
+    line-height: 0.95 !important;
+    letter-spacing: -0.04em !important;
+    font-weight: 800 !important;
+  }
+
+  #grego-sales-2026 h2 {
+    font-size: clamp(24px, 7vw, 48px) !important;
+    line-height: 1.02 !important;
+    letter-spacing: -0.04em !important;
+    font-weight: 800 !important;
+  }
+
+  #grego-sales-2026 h3 {
+    font-size: 18px !important;
+    line-height: 1.25 !important;
+    font-weight: 700 !important;
+  }
+
+  #grego-sales-2026 p,
+  #grego-sales-2026 li {
+    margin: 0 !important;
+    font-size: 15px !important;
+    line-height: 1.65 !important;
+    color: var(--gs-text) !important;
+  }
+
+  #grego-sales-2026 .gs-hero {
+    min-height: 100svh !important;
+    display: flex !important;
+    align-items: stretch !important;
+    padding-top: 14px !important;
+  }
+
+  #grego-sales-2026 .gs-hero-grid {
+    display: grid !important;
+    gap: 18px !important;
+  }
+
+  #grego-sales-2026 .gs-hero-copy {
+    display: grid !important;
+    gap: 16px !important;
+  }
+
+  #grego-sales-2026 .gs-lead {
+    max-width: 34ch !important;
+    font-size: 16px !important;
+    line-height: 1.7 !important;
+    color: #425428 !important;
+  }
+
+  #grego-sales-2026 .gs-rotator {
+    display: inline-flex !important;
+    align-items: center !important;
+    min-height: 40px !important;
+    padding: 10px 14px !important;
+    border-radius: 16px !important;
+    background: rgba(88, 204, 2, 0.12) !important;
+    color: var(--gs-blue-dark) !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+  }
+
+  #grego-sales-2026 .gs-actions {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+    margin-top: 4px !important;
+  }
+
+  #grego-sales-2026 .gs-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    min-height: 56px !important;
+    padding: 14px 20px !important;
+    border-radius: 18px !important;
+    border: 2px solid transparent !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    transition:
+      transform 0.25s ease,
+      box-shadow 0.25s ease,
+      border-color 0.25s ease,
+      background-color 0.25s ease !important;
+    cursor: pointer !important;
+  }
+
+  #grego-sales-2026 .gs-btn:hover {
+    transform: translateY(-1px) !important;
+  }
+
+  #grego-sales-2026 .gs-btn-primary {
+    color: #ffffff !important;
+    background: linear-gradient(180deg, #7ee000 0%, #58cc02 100%) !important;
+    border-color: #4ea600 !important;
+    box-shadow: 0 8px 0 #58a700, 0 18px 30px rgba(88, 167, 0, 0.24) !important;
+  }
+
+  #grego-sales-2026 .gs-btn-secondary {
+    color: var(--gs-blue-dark) !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    border-color: rgba(88, 167, 0, 0.18) !important;
+    box-shadow: 0 8px 0 rgba(88, 167, 0, 0.10) !important;
+  }
+
+  #grego-sales-2026 .gs-hero-panel {
+    display: grid !important;
+    gap: 12px !important;
+    margin-top: 6px !important;
+  }
+
+  #grego-sales-2026 .gs-mini-card,
+  #grego-sales-2026 .gs-point,
+  #grego-sales-2026 .gs-step,
+  #grego-sales-2026 .gs-proof,
+  #grego-sales-2026 .gs-plan,
+  #grego-sales-2026 .gs-outcome-card {
+    border: 2px solid rgba(88, 167, 0, 0.14) !important;
+    border-radius: 22px !important;
+    background: var(--gs-surface-strong) !important;
+    box-shadow: 0 10px 0 rgba(88, 167, 0, 0.10), 0 16px 28px rgba(62, 108, 19, 0.08) !important;
+  }
+
+  #grego-sales-2026 .gs-mini-card {
+    padding: 18px !important;
+  }
+
+  #grego-sales-2026 .gs-mini-grid,
+  #grego-sales-2026 .gs-grid,
+  #grego-sales-2026 .gs-steps,
+  #grego-sales-2026 .gs-proof-grid,
+  #grego-sales-2026 .gs-plan-grid,
+  #grego-sales-2026 .gs-outcomes {
+    display: grid !important;
+    gap: 12px !important;
+  }
+
+  #grego-sales-2026 .gs-mini-grid {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  #grego-sales-2026 .gs-mini-title {
+    display: block !important;
+    margin-bottom: 6px !important;
+    font-size: 12px !important;
+    color: var(--gs-muted) !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.06em !important;
+    font-weight: 700 !important;
+  }
+
+  #grego-sales-2026 .gs-mini-value {
+    font-size: 16px !important;
+    line-height: 1.4 !important;
+    color: var(--gs-ink) !important;
+    font-weight: 700 !important;
+  }
+
+  #grego-sales-2026 .gs-section-head {
+    display: grid !important;
+    gap: 10px !important;
+    margin-bottom: 16px !important;
+  }
+
+  #grego-sales-2026 .gs-section-lead {
+    max-width: 45ch !important;
+    color: #54693a !important;
+  }
+
+  #grego-sales-2026 .gs-personas {
+    display: flex !important;
+    gap: 10px !important;
+    overflow-x: auto !important;
+    padding-bottom: 4px !important;
+    scrollbar-width: none !important;
+  }
+
+  #grego-sales-2026 .gs-personas::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  #grego-sales-2026 .gs-chip {
+    flex: 0 0 auto !important;
+    min-height: 46px !important;
+    padding: 12px 16px !important;
+    border-radius: 999px !important;
+    border: 2px solid rgba(88, 167, 0, 0.16) !important;
+    background: rgba(255, 255, 255, 0.88) !important;
+    color: #4f6631 !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.25s ease !important;
+  }
+
+  #grego-sales-2026 .gs-chip.is-active {
+    background: linear-gradient(180deg, #7ee000 0%, #58cc02 100%) !important;
+    color: #ffffff !important;
+    border-color: #4ea600 !important;
+    box-shadow: 0 8px 0 #58a700, 0 16px 28px rgba(88, 167, 0, 0.18) !important;
+  }
+
+  #grego-sales-2026 .gs-persona-panel {
+    margin-top: 14px !important;
+    padding: 20px !important;
+    border-radius: 24px !important;
+    border: 2px solid rgba(88, 167, 0, 0.14) !important;
+    background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(246,255,236,0.98)) !important;
+  }
+
+  #grego-sales-2026 .gs-persona-label {
+    display: inline-flex !important;
+    margin-bottom: 10px !important;
+    padding: 7px 12px !important;
+    border-radius: 999px !important;
+    background: rgba(255, 214, 10, 0.22) !important;
+    color: var(--gs-blue-dark) !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase !important;
+  }
+
+  #grego-sales-2026 .gs-persona-title {
+    margin-bottom: 8px !important;
+    font-size: 22px !important;
+    line-height: 1.15 !important;
+    color: var(--gs-ink) !important;
+    font-weight: 800 !important;
+  }
+
+  #grego-sales-2026 .gs-persona-points {
+    margin-top: 14px !important;
+    display: grid !important;
+    gap: 10px !important;
+  }
+
+  #grego-sales-2026 .gs-point {
+    padding: 16px !important;
+  }
+
+  #grego-sales-2026 .gs-point strong {
+    display: block !important;
+    margin-bottom: 6px !important;
+    color: var(--gs-ink) !important;
+    font-size: 15px !important;
+    line-height: 1.3 !important;
+  }
+
+  #grego-sales-2026 .gs-outcome-card {
+    padding: 18px !important;
+    position: relative !important;
+    overflow: hidden !important;
+  }
+
+  #grego-sales-2026 .gs-outcome-card::after {
+    content: "" !important;
+    position: absolute !important;
+    inset: auto -24px -24px auto !important;
+    width: 100px !important;
+    height: 100px !important;
+    border-radius: 999px !important;
+    background: rgba(255, 214, 10, 0.20) !important;
+  }
+
+  #grego-sales-2026 .gs-outcome-tag {
+    display: inline-flex !important;
+    margin-bottom: 12px !important;
+    padding: 7px 11px !important;
+    border-radius: 999px !important;
+    background: rgba(88, 204, 2, 0.12) !important;
+    color: var(--gs-blue-dark) !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+  }
+
+  #grego-sales-2026 .gs-steps {
+    counter-reset: gs-steps !important;
+  }
+
+  #grego-sales-2026 .gs-step {
+    padding: 20px !important;
+  }
+
+  #grego-sales-2026 .gs-step::before {
+    counter-increment: gs-steps !important;
+    content: "0" counter(gs-steps) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 38px !important;
+    height: 38px !important;
+    margin-bottom: 14px !important;
+    border-radius: 14px !important;
+    background: rgba(255, 214, 10, 0.24) !important;
+    color: var(--gs-blue-dark) !important;
+    font-size: 13px !important;
+    font-weight: 800 !important;
+  }
+
+  #grego-sales-2026 .gs-step h3 {
+    margin-bottom: 8px !important;
+  }
+
+  #grego-sales-2026 .gs-proof {
+    padding: 18px !important;
+  }
+
+  #grego-sales-2026 .gs-proof-quote {
+    font-size: 16px !important;
+    line-height: 1.7 !important;
+    color: #36511d !important;
+    font-weight: 600 !important;
+  }
+
+  #grego-sales-2026 .gs-proof-meta {
+    margin-top: 12px !important;
+    font-size: 13px !important;
+    color: var(--gs-muted) !important;
+  }
+
+  #grego-sales-2026 .gs-faq {
+    display: grid !important;
+    gap: 10px !important;
+    margin-top: 16px !important;
+  }
+
+  #grego-sales-2026 .gs-faq-item {
+    border: 2px solid rgba(88, 167, 0, 0.14) !important;
+    border-radius: 20px !important;
+    background: rgba(255, 255, 255, 0.92) !important;
+    overflow: hidden !important;
+  }
+
+  #grego-sales-2026 .gs-faq-button {
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    padding: 17px 18px !important;
+    border: 0 !important;
+    background: transparent !important;
+    color: var(--gs-ink) !important;
+    font-size: 15px !important;
+    line-height: 1.45 !important;
+    font-weight: 700 !important;
+    text-align: left !important;
+    cursor: pointer !important;
+  }
+
+  #grego-sales-2026 .gs-faq-icon {
+    flex: 0 0 auto !important;
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 10px !important;
+    background: rgba(255, 214, 10, 0.22) !important;
+    color: var(--gs-blue-dark) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 18px !important;
+    font-weight: 600 !important;
+  }
+
+  #grego-sales-2026 .gs-faq-answer {
+    max-height: 0 !important;
+    overflow: hidden !important;
+    transition: max-height 0.35s ease !important;
+  }
+
+  #grego-sales-2026 .gs-faq-answer-inner {
+    padding: 0 18px 18px !important;
+  }
+
+  #grego-sales-2026 .gs-faq-item.is-open .gs-faq-answer {
+    max-height: 220px !important;
+  }
+
+  #grego-sales-2026 .gs-plan-grid {
+    margin-top: 16px !important;
+  }
+
+  #grego-sales-2026 .gs-plan {
+    padding: 20px !important;
+    position: relative !important;
+    overflow: hidden !important;
+  }
+
+  #grego-sales-2026 .gs-plan.is-featured {
+    background: linear-gradient(180deg, rgba(126, 224, 0, 0.98), rgba(88, 204, 2, 0.98)) !important;
+    border-color: rgba(78, 166, 0, 0.92) !important;
+    box-shadow: 0 12px 0 #58a700, 0 22px 38px rgba(88, 167, 0, 0.26) !important;
+  }
+
+  #grego-sales-2026 .gs-plan.is-featured h3,
+  #grego-sales-2026 .gs-plan.is-featured p,
+  #grego-sales-2026 .gs-plan.is-featured li,
+  #grego-sales-2026 .gs-plan.is-featured .gs-plan-price,
+  #grego-sales-2026 .gs-plan.is-featured .gs-plan-note {
+    color: #ffffff !important;
+  }
+
+  #grego-sales-2026 .gs-plan.is-featured .gs-plan-badge {
+    background: rgba(255, 255, 255, 0.16) !important;
+    color: #ffffff !important;
+  }
+
+  #grego-sales-2026 .gs-plan-badge {
+    display: inline-flex !important;
+    margin-bottom: 14px !important;
+    padding: 7px 12px !important;
+    border-radius: 999px !important;
+    background: rgba(255, 214, 10, 0.22) !important;
+    color: var(--gs-blue-dark) !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+  }
+
+  #grego-sales-2026 .gs-plan-price {
+    margin: 12px 0 6px !important;
+    font-size: 34px !important;
+    line-height: 1 !important;
+    letter-spacing: -0.04em !important;
+    color: var(--gs-ink) !important;
+    font-weight: 800 !important;
+  }
+
+  #grego-sales-2026 .gs-plan-note {
+    color: var(--gs-muted) !important;
+    font-size: 13px !important;
+    line-height: 1.55 !important;
+  }
+
+  #grego-sales-2026 .gs-list {
+    display: grid !important;
+    gap: 10px !important;
+    margin: 16px 0 18px !important;
+    padding: 0 !important;
+    list-style: none !important;
+  }
+
+  #grego-sales-2026 .gs-list li {
+    position: relative !important;
+    padding-left: 26px !important;
+  }
+
+  #grego-sales-2026 .gs-list li::before {
+    content: "" !important;
+    position: absolute !important;
+    left: 0 !important;
+    top: 10px !important;
+    width: 10px !important;
+    height: 10px !important;
+    border-radius: 999px !important;
+    background: linear-gradient(135deg, #7ee000, #58cc02) !important;
+    box-shadow: 0 0 0 5px rgba(88, 204, 2, 0.10) !important;
+  }
+
+  #grego-sales-2026 .gs-plan.is-featured .gs-list li::before {
+    background: #ffffff !important;
+    box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.18) !important;
+  }
+
+  #grego-sales-2026 .gs-note-strip {
+    margin-top: 12px !important;
+    padding: 14px 16px !important;
+    border-radius: 18px !important;
+    background: rgba(255, 214, 10, 0.18) !important;
+    color: var(--gs-blue-dark) !important;
+    font-size: 13px !important;
+    line-height: 1.55 !important;
+    font-weight: 600 !important;
+  }
+
+  #grego-sales-2026 .gs-mobile-bar {
+    position: fixed !important;
+    left: 12px !important;
+    right: 12px !important;
+    bottom: 12px !important;
+    z-index: 50 !important;
+    display: grid !important;
+    grid-template-columns: 1fr auto !important;
+    gap: 10px !important;
+    align-items: center !important;
+    padding: 10px !important;
+    border: 2px solid rgba(88, 167, 0, 0.16) !important;
+    border-radius: 22px !important;
+    background: rgba(255, 255, 255, 0.84) !important;
+    backdrop-filter: blur(18px) !important;
+    -webkit-backdrop-filter: blur(18px) !important;
+    box-shadow: 0 10px 0 rgba(88, 167, 0, 0.12), 0 20px 45px rgba(63, 112, 21, 0.18) !important;
+  }
+
+  #grego-sales-2026 .gs-mobile-copy strong {
+    display: block !important;
+    margin-bottom: 2px !important;
+    color: var(--gs-ink) !important;
+    font-size: 13px !important;
+    line-height: 1.2 !important;
+  }
+
+  #grego-sales-2026 .gs-mobile-copy span {
+    display: block !important;
+    color: var(--gs-muted) !important;
+    font-size: 11px !important;
+    line-height: 1.4 !important;
+  }
+
+  #grego-sales-2026 .gs-mobile-btn {
+    min-width: 148px !important;
+    min-height: 52px !important;
+    border-radius: 16px !important;
+    font-size: 14px !important;
+  }
+
+  #grego-sales-2026 .gs-fade-up {
+    opacity: 0 !important;
+    transform: translateY(26px) !important;
+    transition: opacity 0.7s ease, transform 0.7s ease !important;
+  }
+
+  #grego-sales-2026 .gs-fade-up.is-visible {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+  }
+
+  @media (min-width: 760px) {
+    #grego-sales-2026 {
+      padding-bottom: 42px !important;
+    }
+
+    #grego-sales-2026 .gs-wrap {
+      width: min(1180px, calc(100% - 48px)) !important;
+    }
+
+    #grego-sales-2026 .gs-inner {
+      padding: 34px !important;
+    }
+
+    #grego-sales-2026 .gs-actions {
+      flex-direction: row !important;
+      flex-wrap: wrap !important;
+    }
+
+    #grego-sales-2026 .gs-btn {
+      width: auto !important;
+      min-width: 220px !important;
+    }
+
+    #grego-sales-2026 .gs-grid-2 {
+      display: grid !important;
+      grid-template-columns: 1.08fr 0.92fr !important;
+      gap: 14px !important;
+      align-items: start !important;
+    }
+
+    #grego-sales-2026 .gs-outcomes {
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+
+    #grego-sales-2026 .gs-steps {
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+
+    #grego-sales-2026 .gs-proof-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    #grego-sales-2026 .gs-plan-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+
+    #grego-sales-2026 .gs-hero-grid {
+      grid-template-columns: 1.06fr 0.94fr !important;
+      align-items: center !important;
+    }
+
+    #grego-sales-2026 .gs-mini-grid {
+      grid-template-columns: 1fr 1fr !important;
+    }
+
+    #grego-sales-2026 .gs-mobile-bar {
+      left: auto !important;
+      right: 18px !important;
+      bottom: 18px !important;
+      width: min(360px, calc(100% - 36px)) !important;
+    }
+  }
+</style>
+
+<div id="grego-sales-2026">
+  <section class="gs-section gs-hero">
+    <div class="gs-wrap">
+      <div class="gs-shell gs-fade-up">
+        <div class="gs-inner">
+          <div class="gs-hero-grid">
+            <div class="gs-hero-copy">
+              <span class="gs-kicker">Grego Club · Разговорный клуб для жизни в Испании</span>
+              <div class="gs-rotator" id="gs-rotator">Живой испанский каждую неделю, а не когда получится.</div>
+              <h1>Испанский, <br>на котором вы <br>начнёте говорить чаще</h1>
+              <p class="gs-lead">
+                4 живых созвона в неделю с носителями, <strong>GregoChat</strong> и понятный ритм,
+                который помогает не откладывать испанский и держать его в жизни, а не только в голове.
+              </p>
+              <div class="gs-actions">
+                <a class="gs-btn gs-btn-primary" href="https://t.me/gregoclub_bot" target="_blank" rel="noreferrer">
+                  Забронировать первую неделю
+                </a>
+                <a class="gs-btn gs-btn-secondary" href="#gs-pricing">
+                  Посмотреть формат и тарифы
+                </a>
+              </div>
+            </div>
+
+            <div class="gs-hero-panel">
+              <div class="gs-mini-card">
+                <div class="gs-mini-grid">
+                  <div>
+                    <span class="gs-mini-title">Что вы получаете</span>
+                    <div class="gs-mini-value">Живую практику каждую неделю</div>
+                  </div>
+                  <div>
+                    <span class="gs-mini-title">Что будет сразу</span>
+                    <div class="gs-mini-value">Первый созвон и понятный старт</div>
+                  </div>
+                  <div>
+                    <span class="gs-mini-title">Что внутри</span>
+                    <div class="gs-mini-value">Созвоны, GregoChat, фразы и клуб</div>
+                  </div>
+                  <div>
+                    <span class="gs-mini-title">Кому подходит</span>
+                    <div class="gs-mini-value">Тем, кто давно хочет говорить чаще</div>
+                  </div>
+                </div>
+              </div>
+              <div class="gs-mini-card">
+                <span class="gs-mini-title">Зачем покупать</span>
+                <div class="gs-mini-value" style="margin-bottom: 8px;">Чтобы перестать учить испанский “когда будет время” и начать использовать его каждую неделю.</div>
+                <p>Без тяжёлого курса. Без перегруза. С форматом, в который легко войти уже в первую неделю.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="gs-section">
+    <div class="gs-wrap">
+      <div class="gs-shell gs-fade-up">
+        <div class="gs-inner">
+          <div class="gs-section-head">
+            <span class="gs-kicker">Блок 2 · Для кого</span>
+            <h2>Клуб подойдёт, если вам нужен не ещё один курс, а живая практика</h2>
+            <p class="gs-section-lead">
+              Выберите сценарий, который ближе вам. Обычно решение о покупке рождается именно здесь.
+            </p>
+          </div>
+
+          <div class="gs-personas">
+            <button class="gs-chip is-active" type="button" data-persona="0">Живу в Испании</button>
+            <button class="gs-chip" type="button" data-persona="1">Понимаю, но молчу</button>
+            <button class="gs-chip" type="button" data-persona="2">Начинаю и бросаю</button>
+          </div>
+
+          <div class="gs-persona-panel" id="gs-persona-panel">
+            <span class="gs-persona-label">Сегмент</span>
+            <div class="gs-persona-title">Испанский нужен каждый день, но в голове он есть, а во рту — не всегда.</div>
+            <p>
+              Вы сталкиваетесь с испанским в быту, у врача, в школе, на работе, в разговорах с соседями и местными.
+              Проблема не в том, что вы “совсем не знаете язык”. Проблема в том, что у вас нет ритма живой практики.
+            </p>
+            <div class="gs-persona-points">
+              <div class="gs-point">
+                <strong>Что болит</strong>
+                <p>Язык всё время откладывается. А когда надо говорить — включается скованность.</p>
+              </div>
+              <div class="gs-point">
+                <strong>Почему обычные решения не дожимают</strong>
+                <p>Курсы перегружают. Приложения не учат говорить. Репетитор не создаёт привычку на всю неделю.</p>
+              </div>
+              <div class="gs-point">
+                <strong>Что вам нужно</strong>
+                <p>Простой, живой, регулярный формат. Чтобы говорить чаще и чувствовать себя увереннее в Испании.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="gs-section">
+    <div class="gs-wrap">
+      <div class="gs-shell gs-fade-up">
+        <div class="gs-inner">
+          <div class="gs-section-head">
+            <span class="gs-kicker">Блок 3 · Что вы получаете</span>
+            <h2>За месяц вы начнёте говорить чаще и спокойнее</h2>
+            <p class="gs-section-lead">
+              Здесь важен не объём контента, а результат: язык перестаёт лежать мёртвым грузом и возвращается в вашу неделю.
+            </p>
+          </div>
+          <div class="gs-outcomes">
+            <div class="gs-outcome-card">
+              <span class="gs-outcome-tag">Результат 01</span>
+              <h3>Вы чаще говорите</h3>
+              <p>У вас появляется внешний ритм: не “когда-нибудь загляну”, а живая практика в календаре недели.</p>
+            </div>
+            <div class="gs-outcome-card">
+              <span class="gs-outcome-tag">Результат 02</span>
+              <h3>Меньше страха перед реальной речью</h3>
+              <p>Вы говорите с носителями в безопасной среде и перестаёте ждать идеального уровня, чтобы начать.</p>
+            </div>
+            <div class="gs-outcome-card">
+              <span class="gs-outcome-tag">Результат 03</span>
+              <h3>Испанский не выпадает между делами</h3>
+              <p>Даже если неделя плотная, клуб даёт опору: один созвон, один warm-up, один шаг вперёд.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="gs-section">
+    <div class="gs-wrap">
+      <div class="gs-shell gs-fade-up">
+        <div class="gs-inner">
+          <div class="gs-section-head">
+            <span class="gs-kicker">Блок 4 · Как всё устроено</span>
+            <h2>Формат простой: выбрали слот, пришли, закрепили</h2>
+            <p class="gs-section-lead">
+              Вам не нужно разбираться в сложной схеме. Всё работает в три понятных шага.
+            </p>
+          </div>
+          <div class="gs-steps">
+            <div class="gs-step">
+              <h3>Вы выбираете первый созвон</h3>
+              <p>После оплаты вы не просто “получаете доступ”, а сразу выбираете первый удобный слот на неделе.</p>
+            </div>
+            <div class="gs-step">
+              <h3>Приходите на живую практику</h3>
+              <p>4 созвона в неделю с носителями. Темы — жизнь в Испании, культура, общение, бытовые ситуации, реальная речь.</p>
+            </div>
+            <div class="gs-step">
+              <h3>Держите язык живым между встречами</h3>
+              <p><strong>GregoChat</strong>, фразы недели, короткие warm-up задания и клубный ритм не дают исчезнуть в паузе между эфирами.</p>
+            </div>
+          </div>
+          <div class="gs-note-strip">
+            Внутри подписки: 4 созвона в неделю, GregoChat, база фраз и чек-листов, закрытый клубный канал, тематические встречи и поддержка по пути.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="gs-section">
+    <div class="gs-wrap">
+      <div class="gs-shell gs-fade-up">
+        <div class="gs-inner">
+          <div class="gs-section-head">
+            <span class="gs-kicker">Блок 5 · Почему здесь не сливаются</span>
+            <h2>Почему в Grego Club проще не бросить после оплаты</h2>
+            <p class="gs-section-lead">
+              Обычная проблема не в покупке. Обычная проблема в том, что после оплаты люди так и не начинают ходить. Здесь формат собран так, чтобы вам было легче начать сразу.
+            </p>
+          </div>
+          <div class="gs-outcomes">
+            <div class="gs-outcome-card">
+              <span class="gs-outcome-tag">Механика 01</span>
+              <h3>Первая неделя не остаётся “на потом”</h3>
+              <p>Сразу после оплаты вы идёте не в хаос, а в понятный маршрут: выбрать слот, подготовиться, прийти на первый эфир.</p>
+            </div>
+            <div class="gs-outcome-card">
+              <span class="gs-outcome-tag">Механика 02</span>
+              <h3>Есть мягкая внешняя структура</h3>
+              <p>Напоминания, тема недели, короткие warm-ups и живой ритм помогают не выпадать, даже если график плавает.</p>
+            </div>
+            <div class="gs-outcome-card">
+              <span class="gs-outcome-tag">Механика 03</span>
+              <h3>Не нужно быть идеальным</h3>
+              <p>В клуб приходят не “готовые свободно говорящие”, а обычные люди, которым нужен живой и регулярный контакт с языком.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="gs-section">
+    <div class="gs-wrap">
+      <div class="gs-shell gs-fade-up">
+        <div class="gs-inner">
+          <div class="gs-section-head">
+            <span class="gs-kicker">Блок 6 · Почему это работает</span>
+            <h2>Клуб закрывает то, что обычно не закрывают курс, приложение и даже репетитор</h2>
+          </div>
+
+          <div class="gs-grid-2">
+            <div class="gs-proof-grid">
+              <div class="gs-proof">
+                <div class="gs-proof-quote">Курс может дать знания. Но не всегда даёт привычку говорить. Grego Club решает именно это: у вас появляется живая практика, к которой легко возвращаться каждую неделю.</div>
+                <div class="gs-proof-meta">Вы платите не за теорию, а за ритм реальной речи.</div>
+              </div>
+              <div class="gs-proof">
+                <div class="gs-proof-quote">Репетитор помогает точечно. Приложение удобно в одиночку. А клуб держит язык живым всю неделю: созвоны, темы, короткие warm-up задачи и GregoChat между встречами.</div>
+                <div class="gs-proof-meta">Вы не выпадаете между касаниями и не начинаете каждый раз с нуля.</div>
+              </div>
+            </div>
+
+            <div class="gs-faq">
+              <div class="gs-faq-item is-open">
+                <button class="gs-faq-button" type="button">
+                  А если мне страшно говорить?
+                  <span class="gs-faq-icon">+</span>
+                </button>
+                <div class="gs-faq-answer">
+                  <div class="gs-faq-answer-inner">
+                    <p>Именно для этого и нужен клуб. Вы не обязаны быть “готовым”. У вас есть первый слот, warm-up и живая среда, где можно начать с простого.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="gs-faq-item">
+                <button class="gs-faq-button" type="button">
+                  А если у меня уже был опыт “купил и не ходил”?
+                  <span class="gs-faq-icon">+</span>
+                </button>
+                <div class="gs-faq-answer">
+                  <div class="gs-faq-answer-inner">
+                    <p>Здесь после оплаты вы сразу выбираете первый слот, чтобы не остаться с “доступом на потом”, а действительно начать ходить.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="gs-faq-item">
+                <button class="gs-faq-button" type="button">
+                  Что делать между созвонами?
+                  <span class="gs-faq-icon">+</span>
+                </button>
+                <div class="gs-faq-answer">
+                  <div class="gs-faq-answer-inner">
+                    <p>Использовать GregoChat, брать короткие фразы недели и держать язык в активном состоянии без тяжёлой домашки и длинных заданий.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="gs-section" id="gs-pricing">
+    <div class="gs-wrap">
+      <div class="gs-shell gs-fade-up">
+        <div class="gs-inner">
+          <div class="gs-section-head">
+            <span class="gs-kicker">Блок 7 · Тарифы и CTA</span>
+            <h2>Выберите ритм, который вам подходит</h2>
+            <p class="gs-section-lead">
+              Во всех тарифах одна и та же ценность: живой испанский каждую неделю. Разница только в сроке и цене за месяц.
+            </p>
+          </div>
+
+          <div class="gs-plan-grid">
+            <div class="gs-plan">
+              <span class="gs-plan-badge">Старт</span>
+              <h3>1 месяц</h3>
+              <div class="gs-plan-price">49 €</div>
+              <div class="gs-plan-note">Лучший вариант, если хотите сначала встроить клуб в неделю и понять свой ритм.</div>
+              <ul class="gs-list">
+                <li>4 созвона в неделю</li>
+                <li>GregoChat и клубный канал</li>
+                <li>Фразы и материалы к темам</li>
+                <li>Подходит для первой активации</li>
+              </ul>
+              <a class="gs-btn gs-btn-secondary" href="https://t.me/gregoclub_bot" target="_blank" rel="noreferrer">
+                Начать с 1 месяца
+              </a>
+            </div>
+
+            <div class="gs-plan is-featured">
+              <span class="gs-plan-badge">Оптимально</span>
+              <h3>3 месяца</h3>
+              <div class="gs-plan-price">132 €</div>
+              <div class="gs-plan-note">Для тех, кто хочет не просто попробовать, а удержать привычку и говорить регулярно.</div>
+              <ul class="gs-list">
+                <li>Тот же продукт без ограничений</li>
+                <li>Комфортнее закреплять ритм</li>
+                <li>Ниже цена за месяц</li>
+                <li>Лучший баланс входа и результата</li>
+              </ul>
+              <a class="gs-btn gs-btn-secondary" href="https://t.me/gregoclub_bot" target="_blank" rel="noreferrer" style="background: rgba(255,255,255,0.14) !important; color: #ffffff !important; border-color: rgba(255,255,255,0.18) !important;">
+                Выбрать 3 месяца
+              </a>
+            </div>
+
+            <div class="gs-plan">
+              <span class="gs-plan-badge">Для своих</span>
+              <h3>6 месяцев</h3>
+              <div class="gs-plan-price">235 €</div>
+              <div class="gs-plan-note">Подходит тем, кто уже знает, что ему нужен долгий ритм практики без новых поисков и перезапусков.</div>
+              <ul class="gs-list">
+                <li>Максимально выгодный месяц</li>
+                <li>Удобно для долгой адаптации в Испании</li>
+                <li>Меньше риска снова выпадать</li>
+                <li>Один вход — длинный цикл практики</li>
+              </ul>
+              <a class="gs-btn gs-btn-secondary" href="https://t.me/gregoclub_bot" target="_blank" rel="noreferrer">
+                Выбрать 6 месяцев
+              </a>
+            </div>
+          </div>
+
+          <div class="gs-note-strip">
+            Точная сумма подтверждается в боте перед оплатой. Если хотите сначала спокойно проверить формат, начните с 1 месяца: этого достаточно, чтобы прийти на первые встречи и понять, как клуб встраивается в вашу неделю.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="gs-mobile-bar">
+    <div class="gs-mobile-copy">
+      <strong>Grego Club</strong>
+      <span>4 созвона в неделю. Испанский, который не выпадает из жизни.</span>
+    </div>
+    <a class="gs-btn gs-btn-primary gs-mobile-btn" href="https://t.me/gregoclub_bot" target="_blank" rel="noreferrer">
+      Начать
+    </a>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var root = document.getElementById("grego-sales-2026");
+    if (!root) return;
+
+    var rotator = root.querySelector("#gs-rotator");
+    var phrases = [
+      "Живой испанский каждую неделю, а не когда получится.",
+      "Для русскоязычных в Испании, которым нужно начать говорить чаще.",
+      "Вы платите не за доступ, а за ритм, который держит язык живым."
+    ];
+    var phraseIndex = 0;
+
+    function rotatePhrase() {
+      if (!rotator) return;
+      phraseIndex = (phraseIndex + 1) % phrases.length;
+      rotator.style.opacity = "0";
+      rotator.style.transform = "translateY(8px)";
+      setTimeout(function () {
+        rotator.textContent = phrases[phraseIndex];
+        rotator.style.opacity = "1";
+        rotator.style.transform = "translateY(0)";
+      }, 180);
+    }
+
+    if (rotator) {
+      rotator.style.transition = "opacity 0.28s ease, transform 0.28s ease";
+      setInterval(rotatePhrase, 3200);
+    }
+
+    var personaData = [
+      {
+        label: "Жизнь в Испании",
+        title: "Испанский нужен каждый день, но в голове он есть, а во рту — не всегда.",
+        text: "Вы сталкиваетесь с испанским в быту, у врача, в школе, на работе, в разговорах с соседями и местными. Вам не нужен ещё один тяжёлый учебный процесс. Вам нужен ритм живой практики.",
+        points: [
+          ["Что болит", "Язык всё время откладывается. А когда надо говорить — включается скованность."],
+          ["Почему обычные решения не дожимают", "Курсы перегружают. Приложения не учат говорить. Репетитор не создаёт привычку на всю неделю."],
+          ["Что вам нужно", "Простой, живой, регулярный формат. Чтобы говорить чаще и чувствовать себя увереннее в Испании."]
+        ]
+      },
+      {
+        label: "Страх речи",
+        title: "Понимаете испанский, но теряетесь в ответный момент.",
+        text: "В голове есть слова, но в живом разговоре они не собираются. Значит, вам не столько не хватает знаний, сколько не хватает безопасной и регулярной практики с живыми людьми.",
+        points: [
+          ["Что болит", "Есть страх сделать ошибку и выглядеть глупо."],
+          ["Почему обычные решения не дожимают", "Одиночные уроки не превращаются в привычку, а приложения не дают живой реакции собеседника."],
+          ["Что вам нужно", "Среду, где можно начать говорить без идеальной подготовки и без давления."]
+        ]
+      },
+      {
+        label: "Постоянные откаты",
+        title: "Вы уже покупали язык, но не доходили до системной практики.",
+        text: "Проблема не в мотивации как таковой. Проблема в том, что после покупки нет понятного первого шага и нет внешнего ритма, который держит вас в процессе.",
+        points: [
+          ["Что болит", "Покупка есть, а реального участия нет."],
+          ["Почему обычные решения не дожимают", "Слишком много свободы и слишком мало структуры в первые дни."],
+          ["Что вам нужно", "Чтобы после оплаты было ясно, что делать сегодня, на этой неделе и как не выпасть снова."]
+        ]
+      }
+    ];
+
+    var chips = root.querySelectorAll(".gs-chip");
+    var personaPanel = root.querySelector("#gs-persona-panel");
+
+    function renderPersona(index) {
+      if (!personaPanel || !personaData[index]) return;
+      var item = personaData[index];
+      var pointsHtml = item.points.map(function (point) {
+        return (
+          '<div class="gs-point">' +
+            "<strong>" + point[0] + "</strong>" +
+            "<p>" + point[1] + "</p>" +
+          "</div>"
+        );
+      }).join("");
+
+      personaPanel.innerHTML =
+        '<span class="gs-persona-label">' + item.label + "</span>" +
+        '<div class="gs-persona-title">' + item.title + "</div>" +
+        "<p>" + item.text + "</p>" +
+        '<div class="gs-persona-points">' + pointsHtml + "</div>";
+    }
+
+    chips.forEach(function (chip) {
+      chip.addEventListener("click", function () {
+        chips.forEach(function (node) { node.classList.remove("is-active"); });
+        chip.classList.add("is-active");
+        renderPersona(Number(chip.getAttribute("data-persona")));
+      });
+    });
+
+    var faqItems = root.querySelectorAll(".gs-faq-item");
+    faqItems.forEach(function (item) {
+      var button = item.querySelector(".gs-faq-button");
+      if (!button) return;
+      button.addEventListener("click", function () {
+        var isOpen = item.classList.contains("is-open");
+        faqItems.forEach(function (node) { node.classList.remove("is-open"); });
+        if (!isOpen) item.classList.add("is-open");
+      });
+    });
+
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.18 });
+
+    root.querySelectorAll(".gs-fade-up").forEach(function (node) {
+      observer.observe(node);
+    });
+  })();
+</script>
