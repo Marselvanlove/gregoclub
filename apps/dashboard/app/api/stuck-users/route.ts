@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { getStuckUsersData } from "@/lib/queries";
+import { hasDatabaseUrl } from "@/lib/db";
+import { getDashboardPageData, getStuckUsersData } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const data = await getStuckUsersData({
+  const filters = {
     from: searchParams.get("from"),
     to: searchParams.get("to"),
     source: searchParams.get("source"),
@@ -15,6 +16,9 @@ export async function GET(request: NextRequest) {
     tariff: searchParams.get("tariff"),
     provider: searchParams.get("provider"),
     onboardingVersion: searchParams.get("onboardingVersion"),
-  });
+  };
+  const data = hasDatabaseUrl()
+    ? await getStuckUsersData(filters)
+    : (await getDashboardPageData(filters)).stuckUsers;
   return NextResponse.json({ data });
 }

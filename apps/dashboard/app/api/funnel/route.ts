@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { getFunnelData } from "@/lib/queries";
+import { hasDatabaseUrl } from "@/lib/db";
+import { getDashboardPageData, getFunnelData } from "@/lib/queries";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const data = await getFunnelData({
+  const filters = {
     from: searchParams.get("from"),
     to: searchParams.get("to"),
     source: searchParams.get("source"),
@@ -15,6 +16,9 @@ export async function GET(request: NextRequest) {
     tariff: searchParams.get("tariff"),
     provider: searchParams.get("provider"),
     onboardingVersion: searchParams.get("onboardingVersion"),
-  });
+  };
+  const data = hasDatabaseUrl()
+    ? await getFunnelData(filters)
+    : (await getDashboardPageData(filters)).funnel;
   return NextResponse.json({ data });
 }
